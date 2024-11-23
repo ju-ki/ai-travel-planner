@@ -55,31 +55,10 @@ jobs:
               --base dev \
               --head "$CURRENT_BRANCH" \
               --title "$COMMIT_MESSAGE" \
-              --body "This PR is automatically created by GitHub Actions.")
+              --body "This PR is automatically created by GitHub Actions. \ @coderabbitai review")
             echo "::set-output name=pr_url::$PR_URL"
             echo "PR created at $PR_URL"
           else
             echo "::set-output name=pr_url::"
             echo "No changes to create a PR for."
-          fi
-
-      - name: Request Review from @coderabbit
-        if: success() && steps.create-pr.outputs.pr_url != ''
-        env:
-          GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
-        run: |
-          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          if [ "$CURRENT_BRANCH" != "dev" ]; then
-            PR_NUMBER=$(gh pr list --head "$CURRENT_BRANCH" --json number --jq ".[0].number")
-            if [ -n "$PR_NUMBER" ]; then
-              gh api \
-                --method POST \
-                -H "Authorization: token $GH_TOKEN" \
-                /repos/${{ github.repository }}/pulls/$PR_NUMBER/requested_reviewers \
-                -f reviewers='["coderabbit"]'
-            else
-              echo "PR number not found."
-            fi
-          else
-            echo "No review request needed."
           fi
