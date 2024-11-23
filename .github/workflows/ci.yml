@@ -34,7 +34,7 @@ jobs:
 
   create-pull-request:
     if: github.event_name == 'push'
-    needs: [next_test]
+    needs: [lint-and-format]
     runs-on: ubuntu-latest
     steps:
       - name: Install GitHub CLI
