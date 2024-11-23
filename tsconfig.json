@@ -18,6 +18,8 @@
     }],
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./src/*"],
       "@/components/*": ["src/components/*"],
       "@/utils/*": ["src/utils/*"],
       "@/styles/*": ["src/styles/*"]
