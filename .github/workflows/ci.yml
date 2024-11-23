@@ -31,11 +31,15 @@ jobs:
 
       - name: Run Prettier check
         run: bun prettier --check "src/**/*.{js,ts,jsx,tsx,json,md}"
+
   create-pull-request:
     if: github.event_name == 'push'
     needs: [next_test]
     runs-on: ubuntu-latest
     steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -49,24 +53,29 @@ jobs:
           if [ "$CURRENT_BRANCH" != "dev" ]; then
             PR_URL=$(gh pr create \
               --base dev \
-              --head $CURRENT_BRANCH \
+              --head "$CURRENT_BRANCH" \
               --title "$COMMIT_MESSAGE" \
-              --body "
-              This PR is automatically created by GitHub Actions.
-              ")
+              --body "This PR is automatically created by GitHub Actions.")
+            echo "::set-output name=pr_url::$PR_URL"
             echo "PR created at $PR_URL"
           else
-            echo "No changes to create a PR for." 
+            echo "::set-output name=pr_url::"
+            echo "No changes to create a PR for."
+          fi
 
       - name: Request Review from @coderabbit
-        if: success() && steps.create-pr.outputs.pr_url
+        if: success() && steps.create-pr.outputs.pr_url != ''
         env:
           GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
         run: |
           CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
           if [ "$CURRENT_BRANCH" != "dev" ]; then
             PR_NUMBER=$(gh pr list --head "$CURRENT_BRANCH" --json number --jq ".[0].number")
-            gh pr review-request $PR_NUMBER --reviewer coderabbit
+            if [ -n "$PR_NUMBER" ]; then
+              gh pr review-request $PR_NUMBER --reviewer coderabbit
+            else
+              echo "PR number not found."
+            fi
           else
             echo "No review request needed."
           fi
