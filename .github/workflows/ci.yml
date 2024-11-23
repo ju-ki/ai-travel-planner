@@ -72,7 +72,11 @@ jobs:
           if [ "$CURRENT_BRANCH" != "dev" ]; then
             PR_NUMBER=$(gh pr list --head "$CURRENT_BRANCH" --json number --jq ".[0].number")
             if [ -n "$PR_NUMBER" ]; then
-              gh pr review-request $PR_NUMBER --reviewer coderabbit
+              gh api \
+                --method POST \
+                -H "Authorization: token $GH_TOKEN" \
+                /repos/${{ github.repository }}/pulls/$PR_NUMBER/requested_reviewers \
+                -f reviewers='["coderabbit"]'
             else
               echo "PR number not found."
             fi
