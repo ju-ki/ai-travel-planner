@@ -3,11 +3,16 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - feature**
+      - fix**
+      - dev
   pull_request:
+    branches:
+      - dev
+      - master
 
 jobs:
-  lint:
+  lint-and-format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,3 +31,50 @@ jobs:
 
       - name: Run Prettier check
         run: bun prettier --check "src/**/*.{js,ts,jsx,tsx,json,md}"
+
+  create-pull-request:
+    if: github.event_name == 'push'
+    needs: [next_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check and Create Pull Request
+        id: create-pr
+        env:
+          GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$CURRENT_BRANCH" != "dev" ]; then
+            # 既存のPRをチェック
+            EXISTING_PR=$(gh pr list --head "$CURRENT_BRANCH" --base dev --json number --jq '.[0].number')
+            if [ -n "$EXISTING_PR" ]; then
+              echo "既存のPRが見つかりました: #$EXISTING_PR"
+              echo "pr_url=$(gh pr view $EXISTING_PR --json url --jq .url)" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            PR_URL=$(gh pr create \
+              --base dev \
+              --head "$CURRENT_BRANCH" \
+              --title "🤖 [Auto] $COMMIT_MESSAGE" \
+              --body "## 自動生成されたPR
+              このPRはGitHub Actionsによって自動的に作成されました。
+
+              ### 変更内容
+              ${COMMIT_MESSAGE}
+
+              ### レビュー依頼
+              @coderabbitai review")
+                          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+                          echo "PR created at $PR_URL"
+                        else
+                          echo "pr_url=" >> $GITHUB_OUTPUT
+                          echo "No changes to create a PR for."
+                        fi
+
