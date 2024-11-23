@@ -3,3 +3,4 @@ build/
 .next/
 out/
 *.log
+*.json
