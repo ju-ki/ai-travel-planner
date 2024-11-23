@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bell, Cloud, Compass, Edit, Link, PlaneLanding } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +10,22 @@ const Home = () => {
   return (
     <main className="flex-1">
       {/* ヒーローセクション */}
-      <section className="w-full py-12 md:py-24 bg-cover bg-center" style={{ backgroundImage: "url('/scene.webp')" }}>
-        <div className="container px-4 md:px-6 text-center text-white">
+      <section
+        className="relative w-full py-12 md:py-24 bg-cover bg-center"
+        role="banner"
+        aria-label="旅行計画アプリのバナー"
+      >
+        <Image
+          src="/scene.webp"
+          alt="旅行計画の背景画像"
+          layout="fill"
+          objectFit="cover"
+          priority={true}
+          className="-z-10"
+        />
+        <div className="container px-4 md:px-6 text-center text-white relative z-10">
           <h1 className="text-4xl font-bold md:text-6xl">AIで旅行をもっと便利に</h1>
-          <p className="mt-4 max-w-xl mx-auto text-lg md:text-xl">
-            AIが最適な旅行プランを提案します。あなたの理想の旅を、簡単に。
-          </p>
+          <p className="mt-4 max-w-xl mx-auto text-lg md:text-xl">AIがあなたにあった旅行プランの作成に力を貸します／</p>
           <div className="mt-6 space-x-4">
             <SignedIn>
               <Button>今すぐ試す</Button>
