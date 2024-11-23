@@ -3,11 +3,16 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - feature**
+      - fix**
+      - dev
   pull_request:
+    branches:
+      - dev
+      - master
 
 jobs:
-  lint:
+  next_test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,3 +31,29 @@ jobs:
 
       - name: Run Prettier check
         run: bun prettier --check "src/**/*.{js,ts,jsx,tsx,json,md}"
+  create-pull-request:
+    if: github.event_name == 'push'
+    needs: [next_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check and Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$CURRENT_BRANCH" != "dev" ]; then
+            gh pr create \
+              --base dev \
+              --head $CURRENT_BRANCH \
+              --title "$COMMIT_MESSAGE" \
+              --body "
+              This PR is automatically created by GitHub Actions
+              @coderabbitai review
+              "
+          else
+            echo "No changes to create a PR for."
+          fi
