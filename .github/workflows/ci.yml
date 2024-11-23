@@ -40,6 +40,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Check and Create Pull Request
+        id: create-pr
         env:
           GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -58,7 +59,7 @@ jobs:
             echo "No changes to create a PR for." 
 
       - name: Request Review from @coderabbit
-        if: success() && steps.create-pull-request.outputs.PR_URL
+        if: success() && steps.create-pr.outputs.pr_url
         env:
           GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
         run: |
@@ -68,3 +69,4 @@ jobs:
             gh pr review-request $PR_NUMBER --reviewer coderabbit
           else
             echo "No review request needed."
+          fi
