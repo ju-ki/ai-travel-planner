@@ -18,7 +18,7 @@ const Header = () => {
 
       <div className="hidden lg:flex items-center space-x-6">
         <SignedIn>
-          <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/plan/create" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
             プラン作成
           </Link>
           <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
@@ -51,7 +51,11 @@ const Header = () => {
                 <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
                   トップへ
                 </Link>
-                <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                <Link
+                  href="/plan/create"
+                  className="text-sm font-medium hover:underline underline-offset-4"
+                  prefetch={false}
+                >
                   プラン作成
                 </Link>
                 <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
