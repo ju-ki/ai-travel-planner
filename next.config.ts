@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     config.resolve.alias['~'] = path.join(__dirname, 'src');
     return config;
   },
+  images: {
+    domains: ['places.googleapis.com'],
+  },
 };
 
 export default nextConfig;

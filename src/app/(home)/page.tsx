@@ -1,7 +1,9 @@
 import React from 'react';
-import { Bell, Cloud, Compass, Edit, Link, PlaneLanding } from 'lucide-react';
+import { Bell, Cloud, Compass, Edit, PlaneLanding } from 'lucide-react';
+import { Link as LinkIcon } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +30,15 @@ const Home = () => {
           <p className="mt-4 max-w-xl mx-auto text-lg md:text-xl">AIがあなたにあった旅行プランの作成に力を貸します／</p>
           <div className="mt-6 space-x-4">
             <SignedIn>
-              <Button>今すぐ試す</Button>
+              <Button>
+                <Link
+                  href="/plan/create"
+                  className="text-sm font-medium hover:underline underline-offset-4"
+                  prefetch={false}
+                >
+                  今すぐ試す
+                </Link>
+              </Button>
             </SignedIn>
             <SignedOut>
               <SignInButton>
@@ -74,7 +84,7 @@ const Home = () => {
             </Card>
             <Card>
               <CardHeader>
-                <Link className="h-6 w-6 mb-2" />
+                <LinkIcon className="h-6 w-6 mb-2" />
                 <CardTitle>外部リンク機能</CardTitle>
               </CardHeader>
               <CardContent>
