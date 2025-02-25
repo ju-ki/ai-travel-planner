@@ -77,4 +77,3 @@ jobs:
                           echo "pr_url=" >> $GITHUB_OUTPUT
                           echo "No changes to create a PR for."
                         fi
-

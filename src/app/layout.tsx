@@ -1,11 +1,13 @@
 import { ClerkProvider } from '@clerk/nextjs';
 
 import './globals.css';
+
 import Header from '@/components/common/header';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
+      <title>AI旅行計画プランナー</title>
       <body>
         <ClerkProvider>
           <Header />
