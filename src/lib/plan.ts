@@ -22,7 +22,7 @@ export const schema = z.object({
       transportation_method: z.array(z.number()).refine((value) => value.some((item) => item), {
         message: '移動手段は最低でも1つ以上選択してください',
       }),
-      memo: z.string().optional(),
+      memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),
     }),
   ),
   plans: z.array(
@@ -46,6 +46,7 @@ export const schema = z.object({
           start: z.string().time(),
           end: z.string().time(),
         }),
+        memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),
         image: z.string().url().optional(),
         rating: z.number().optional(),
         category: z.array(z.string()),
