@@ -37,9 +37,11 @@ const PlanningButton = ({ date }: { date: string }) => {
     }
 
     fields.setSimulationStatus({ date: new Date(date), status: 1 });
-    alert('シミュレーションしています');
+    alert('プランニング中です');
     //TODO: 非同期でプラン作成をシミュレーションする機能の追加
-    fields.setSimulationStatus({ date: new Date(date), status: 2 });
+    setTimeout(() => {
+      fields.setSimulationStatus({ date: new Date(date), status: 2 });
+    }, 10000); // 2秒後にシミュレーション完了状態に
   };
   return (
     <div>
