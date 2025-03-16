@@ -1,4 +1,4 @@
-type Location = {
+export type Location = {
   name: string;
   latitude: number;
   longitude: number;
@@ -31,6 +31,7 @@ export type TripInfo = {
 };
 
 export type Spot = {
+  id: string;
   name: string;
   lat: number;
   lng: number;

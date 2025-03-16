@@ -12,12 +12,19 @@ import { DraggableHandle, DroppableHandle } from './common/DndItem';
 const GanttChart = ({ date }: { date: string }) => {
   const fields = useStoreForPlanning();
   const [spots, setSpots] = useState<Spot[] | []>([]);
+  const [draggedItems, setDraggedItems] = useState<{ id: string; isDragged: boolean }[] | []>([]);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
 
   useEffect(() => {
     const filteredSpots = fields.plans.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0];
     if (filteredSpots) {
       setSpots(filteredSpots.spots);
+      setDraggedItems(
+        filteredSpots.spots.map((val) => ({
+          id: val.id,
+          isDragged: false,
+        })),
+      );
     }
   }, [fields, fields.plans, date]);
 
@@ -37,10 +44,10 @@ const GanttChart = ({ date }: { date: string }) => {
 
   const isStartPoint = (hour: string, minute: number, id: string) => {
     const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    // const targetData = activities.filter((activity) => activity.id === id)[0];
-    // if (targetData.start === time) {
-    //   return true;
-    // }
+    const targetData = spots.filter((spot) => spot.id === id)[0];
+    if (targetData.stay.start === time) {
+      return true;
+    }
     return false;
   };
 
@@ -48,16 +55,18 @@ const GanttChart = ({ date }: { date: string }) => {
     hour = minute == 45 ? hour + 1 : hour;
     minute = minute == 45 ? 0 : minute + 15;
     const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    // const targetData = activities.filter((activity) => activity.id === id)[0];
-    // if (targetData.end === time) {
-    //   return true;
-    // }
+    const targetData = spots.filter((spot) => spot.id === id)[0];
+    if (targetData.stay.end === time) {
+      return true;
+    }
     return false;
   };
 
   const handleDragStart = (event: DragStartEvent) => {
     const [id, type] = event.active.id.toString().split('-').map(String);
-    setActivities((prev) => prev.map((activity) => (activity.id === id ? { ...activity, isDragged: true } : activity)));
+    setDraggedItems((prev) =>
+      prev.map((activity) => (activity.id === id ? { ...activity, isDragged: true } : activity)),
+    );
   };
 
   const handleDragMove = (event: DragMoveEvent) => {
@@ -66,27 +75,27 @@ const GanttChart = ({ date }: { date: string }) => {
     if (event.over) {
       const [spotId, newTime] = event.over.id.toString().split('-').map(String);
       if (type === 'start') {
-        const endTime = activities.filter((activity) => activity.id === draggingId)[0].end;
+        const endTime = spots.filter((activity) => activity.id === draggingId)[0].stay.end;
         // 始点が終点を超える場合はこれ以上ドラッグしない
         if (newTime >= endTime) {
           return;
         }
-        setActivities((prev) =>
+        setSpots((prev) =>
           prev.map((activity) => (activity.id === draggingId ? { ...activity, start: newTime } : activity)),
         );
       } else if (type === 'end') {
-        const startTime = activities.filter((activity) => activity.id === draggingId)[0].start;
+        const startTime = spots.filter((activity) => activity.id === draggingId)[0].stay.start;
         // 終点が始点を下回る場合はこれ以上ドラッグしない
         if (newTime <= startTime) {
           return;
         }
-        setActivities((prev) =>
+        setSpots((prev) =>
           prev.map((activity) => (activity.id === draggingId ? { ...activity, end: newTime } : activity)),
         );
       } else {
         //現在の時間を取得
-        const startTime = activities.filter((activity) => activity.id === draggingId)[0].start;
-        const endTime = activities.filter((activity) => activity.id === draggingId)[0].end;
+        const startTime = spots.filter((activity) => activity.id === draggingId)[0].stay.start;
+        const endTime = spots.filter((activity) => activity.id === draggingId)[0].stay.end;
         //選択している時間とドロップ先の差分を取得
         const diffTime = calcDiffTime(newTime, type);
         //差分をもとに始点と終点を更新
@@ -101,60 +110,72 @@ const GanttChart = ({ date }: { date: string }) => {
     const [draggedId, type] = event.active.id.toString().split('-').map(String);
     if (event.over) {
       const [spotId, newTime] = event.over.id.toString().split('-').map(String);
-      const prevData = activities.filter((activity) => activity.id === spotId)[0];
+      const prevData = spots.filter((activity) => activity.id === spotId)[0];
       // 始点が終点を超える場合は反映させない
       if (type === 'start') {
-        if (newTime > prevData.end) {
+        if (newTime > prevData.stay.end) {
           return;
         }
-        setActivities((prev) =>
+        setDraggedItems((prev) =>
           prev.map((activity) =>
             activity.id === draggedId ? { ...activity, isDragged: false, start: newTime } : activity,
           ),
         );
+        const targetSpot = spots.find((spot) => spot.id === draggedId);
+        if (targetSpot) {
+          fields.setSpots(
+            new Date(date),
+            { ...targetSpot, stay: { start: newTime, end: targetSpot?.stay.end } },
+            false,
+          );
+        }
       } else if (type === 'end') {
         // 終点が始点を下回る場合は反映しない
-        if (newTime < prevData.start) {
+        if (newTime < prevData.stay.start) {
           return;
         }
-        setActivities((prev) =>
+        setDraggedItems((prev) =>
           prev.map((activity) =>
             activity.id === draggedId ? { ...activity, isDragged: false, end: newTime } : activity,
           ),
         );
+
+        const targetSpot = spots.find((spot) => spot.id === draggedId);
+        if (targetSpot) {
+          fields.setSpots(
+            new Date(date),
+            { ...targetSpot, stay: { start: targetSpot?.stay.start, end: newTime } },
+            false,
+          );
+        }
       } else {
         //現在の時間を取得
-        const startTime = activities.filter((activity) => activity.id === spotId)[0].start;
-        const endTime = activities.filter((activity) => activity.id === spotId)[0].end;
+        const startTime = spots.filter((activity) => activity.id === spotId)[0].stay.start;
+        const endTime = spots.filter((activity) => activity.id === spotId)[0].stay.end;
         //選択している時間とドロップ先の差分を取得
         const diffTime = calcDiffTime(newTime, type);
         //差分をもとに始点と終点を更新
         const updatedStartTime = updatedTime(startTime, diffTime);
         const updatedEndTime = updatedTime(endTime, diffTime);
 
-        setActivities((prev) =>
+        setDraggedItems((prev) =>
           prev.map((activity) =>
             activity.id === spotId
               ? { ...activity, isDragged: false, start: updatedStartTime, end: updatedEndTime }
               : activity,
           ),
         );
+
+        const targetSpot = spots.find((spot) => spot.id === draggedId);
+        if (targetSpot) {
+          fields.setSpots(
+            new Date(date),
+            { ...targetSpot, stay: { start: updatedStartTime, end: updatedEndTime } },
+            false,
+          );
+        }
       }
     }
-  };
-
-  const updateActivityTime = (id: string, newTime: string, isStart: boolean) => {
-    setActivities((prev) =>
-      prev.map((activity) =>
-        activity.id === id
-          ? {
-              ...activity,
-              start: isStart ? newTime : activity.start,
-              end: isStart ? activity.end : newTime,
-            }
-          : activity,
-      ),
-    );
   };
 
   if (timeSlots.length === 0 || !spots.length) {
@@ -204,17 +225,17 @@ const GanttChart = ({ date }: { date: string }) => {
                 return (
                   <Fragment key={index}>
                     {timeRange.map((minute) => {
-                      const isStart = isStartPoint(timeSlot.split(':')[0], minute, id.toString());
-                      const isEnd = isEndPoint(Number.parseInt(timeSlot.split(':')[0]), minute, id.toString());
-                      const isDragged = false; //仮
+                      const isStart = isStartPoint(timeSlot.split(':')[0], minute, spot.id);
+                      const isEnd = isEndPoint(Number.parseInt(timeSlot.split(':')[0]), minute, spot.id);
+                      const isDragged = draggedItems.filter((val) => val.id === spot.id)[0].isDragged;
                       return (
                         <DroppableHandle
                           key={minute}
-                          id={`${id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
+                          id={`${spot.id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
                         >
                           {isTimeWithinRange(timeSlot.split(':')[0], minute, spot.stay.start, spot.stay.end) && (
                             <DraggableHandle
-                              id={`${id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
+                              id={`${spot.id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
                               isStart={false}
                               isEnd={false}
                               isDragged={isDragged}
@@ -224,22 +245,22 @@ const GanttChart = ({ date }: { date: string }) => {
                           )}
                           {isStart && (
                             <DraggableHandle
-                              id={id.toString()}
+                              id={spot.id}
                               isStart
                               isEnd={false}
                               isDragged={isDragged}
                               onDragStart={() => {}}
-                              onDragEnd={updateActivityTime}
+                              onDragEnd={() => {}}
                             />
                           )}
                           {isEnd && (
                             <DraggableHandle
-                              id={id.toString()}
+                              id={spot.id}
                               isStart={false}
                               isEnd
                               isDragged={isDragged}
                               onDragStart={() => {}}
-                              onDragEnd={updateActivityTime}
+                              onDragEnd={() => {}}
                             />
                           )}
                         </DroppableHandle>

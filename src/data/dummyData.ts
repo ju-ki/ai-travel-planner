@@ -9,6 +9,7 @@ export const initialActivities: TravelPlanType = {
   },
   spots: [
     {
+      id: '1',
       name: '大阪城',
       lat: 34.687315,
       lng: 135.525929,
@@ -25,6 +26,7 @@ export const initialActivities: TravelPlanType = {
       },
     },
     {
+      id: '2',
       name: '道頓堀',
       lat: 34.668907,
       lng: 135.501291,
@@ -41,6 +43,7 @@ export const initialActivities: TravelPlanType = {
       },
     },
     {
+      id: '3',
       name: '通天閣',
       lat: 34.652525,
       lng: 135.506225,
@@ -57,6 +60,7 @@ export const initialActivities: TravelPlanType = {
       },
     },
     {
+      id: '4',
       name: 'あべのハルカス',
       lat: 34.645396,
       lng: 135.513446,
@@ -91,6 +95,7 @@ export const osakaKyotoTravelPlan: TravelPlanType = {
   },
   spots: [
     {
+      id: '5',
       name: '大阪城',
       lat: 34.687315,
       lng: 135.525929,
@@ -104,6 +109,7 @@ export const osakaKyotoTravelPlan: TravelPlanType = {
       description: '豊臣秀吉によって築かれた大阪城。壮大な天守閣からは、大阪の街を一望できます。',
     },
     {
+      id: '6',
       name: '清水寺',
       lat: 34.9967,
       lng: 135.785,
@@ -117,6 +123,7 @@ export const osakaKyotoTravelPlan: TravelPlanType = {
       description: '清水寺は、京都の象徴的な寺院で、壮大な木造の本堂と美しい景観が魅力です。',
     },
     {
+      id: '7',
       name: '伏見稲荷大社',
       lat: 34.8666,
       lng: 135.7323,
@@ -147,6 +154,7 @@ export const tokyoTravelPlan: TravelPlanType = {
   },
   spots: [
     {
+      id: '8',
       name: '浅草寺',
       lat: 35.7148,
       lng: 139.7967,
@@ -160,6 +168,7 @@ export const tokyoTravelPlan: TravelPlanType = {
       description: '浅草寺は東京で最も有名な寺院で、雷門や周辺の繁華街も楽しめます。',
     },
     {
+      id: '9',
       name: '東京タワー',
       lat: 35.6586,
       lng: 139.7454,
@@ -173,6 +182,7 @@ export const tokyoTravelPlan: TravelPlanType = {
       description: '東京タワーは、東京のシンボルで、展望台からは東京市内を一望できます。',
     },
     {
+      id: '10',
       name: '秋葉原',
       lat: 35.6998,
       lng: 139.7745,
@@ -203,6 +213,7 @@ export const sapporoTravelPlan: TravelPlanType = {
   },
   spots: [
     {
+      id: '11',
       name: '大通公園',
       lat: 43.0623,
       lng: 141.3544,
@@ -216,6 +227,7 @@ export const sapporoTravelPlan: TravelPlanType = {
       description: '大通公園は札幌市中心部にある広大な公園で、季節ごとに美しい景色が楽しめます。',
     },
     {
+      id: '12',
       name: '札幌時計台',
       lat: 43.0687,
       lng: 141.3509,
@@ -229,6 +241,7 @@ export const sapporoTravelPlan: TravelPlanType = {
       description: '札幌時計台は、札幌の象徴的な歴史的建物で、観光名所となっています。',
     },
     {
+      id: '13',
       name: 'すすきの',
       lat: 43.0615,
       lng: 141.3544,

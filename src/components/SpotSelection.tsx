@@ -41,13 +41,9 @@ const SpotSelection = ({ date }: { date: string }) => {
                     const isSelected = selectedSpots.some((s) => s.name === spot.name);
 
                     if (!isSelected) {
-                      fields.setPlan(new Date(date), 'spots', [...selectedSpots, spot]);
+                      fields.setSpots(new Date(date), spot, false);
                     } else {
-                      fields.setPlan(
-                        new Date(date),
-                        'spots',
-                        selectedSpots.filter((s) => s.name !== spot.name),
-                      );
+                      fields.setSpots(new Date(date), spot, true);
                     }
                   }}
                 >
