@@ -1,7 +1,7 @@
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { useEffect } from 'react';
 
-import { useDeparture } from '@/lib/plan';
+import { useStoreForPlanning } from '@/lib/plan';
 const INITIALIZE_ZOOM = 15; // ズームレベル
 
 const INITIALIZE_MAP_WIDTH = '100%'; // 地図の幅
@@ -17,13 +17,14 @@ interface GoogleMapCompProps {
 }
 
 const GoogleMapComponent: React.FC<GoogleMapCompProps> = ({ isSetCurrentLocation }: GoogleMapCompProps) => {
-  const { getDeparture, setDeparture } = useDeparture();
+  const fields = useStoreForPlanning();
   useEffect(() => {
     if (isSetCurrentLocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        setDeparture({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+        fields.setFields('departure', {
+          name: '出発地',
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
         });
       });
     }
@@ -33,7 +34,7 @@ const GoogleMapComponent: React.FC<GoogleMapCompProps> = ({ isSetCurrentLocation
     if (event.latLng) {
       const lat = event.latLng.lat();
       const lng = event.latLng.lng();
-      setDeparture({ lat, lng });
+      fields.setFields('departure', { name: '出発地', latitude: lat, longitude: lng });
     }
   };
 
@@ -41,11 +42,11 @@ const GoogleMapComponent: React.FC<GoogleMapCompProps> = ({ isSetCurrentLocation
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}>
       <GoogleMap
         mapContainerStyle={CONTAINER_STYLE}
-        center={getDeparture()}
+        center={{ lat: fields.departure.latitude, lng: fields.departure.longitude }}
         zoom={INITIALIZE_ZOOM}
         onClick={handleMapClick}
       >
-        <Marker position={getDeparture()} />
+        <Marker position={{ lat: fields.departure.latitude, lng: fields.departure.longitude }} />
       </GoogleMap>
     </LoadScript>
   );

@@ -4,26 +4,22 @@ import { Fragment, useEffect, useState } from 'react';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 
 import { calcDiffTime, updatedTime } from '@/lib/utils';
+import { Spot } from '@/types/plan';
+import { useStoreForPlanning } from '@/lib/plan';
 
 import { DraggableHandle, DroppableHandle } from './common/DndItem';
 
-interface Activity {
-  id: string;
-  spot: string;
-  start: string;
-  end: string;
-  isDragged: boolean;
-}
-
-const GanttChart: React.FC = () => {
-  const initialActivities: Activity[] = [
-    { id: '1', spot: 'Eiffel Tower', start: '09:00', end: '11:15', isDragged: false },
-    { id: '2', spot: 'Louvre Museum', start: '12:00', end: '13:30', isDragged: false },
-    { id: '3', spot: 'Notre-Dame', start: '14:00', end: '15:45', isDragged: false },
-    { id: '4', spot: '東京タワー', start: '16:00', end: '17:00', isDragged: false },
-  ];
-  const [activities, setActivities] = useState(initialActivities);
+const GanttChart = ({ date }: { date: string }) => {
+  const fields = useStoreForPlanning();
+  const [spots, setSpots] = useState<Spot[] | []>([]);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
+
+  useEffect(() => {
+    const filteredSpots = fields.plans.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0];
+    if (filteredSpots) {
+      setSpots(filteredSpots.spots);
+    }
+  }, [fields, fields.plans, date]);
 
   useEffect(() => {
     const slots = Array.from({ length: 25 }, (_, i) => {
@@ -41,10 +37,10 @@ const GanttChart: React.FC = () => {
 
   const isStartPoint = (hour: string, minute: number, id: string) => {
     const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    const targetData = activities.filter((activity) => activity.id === id)[0];
-    if (targetData.start === time) {
-      return true;
-    }
+    // const targetData = activities.filter((activity) => activity.id === id)[0];
+    // if (targetData.start === time) {
+    //   return true;
+    // }
     return false;
   };
 
@@ -52,10 +48,10 @@ const GanttChart: React.FC = () => {
     hour = minute == 45 ? hour + 1 : hour;
     minute = minute == 45 ? 0 : minute + 15;
     const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    const targetData = activities.filter((activity) => activity.id === id)[0];
-    if (targetData.end === time) {
-      return true;
-    }
+    // const targetData = activities.filter((activity) => activity.id === id)[0];
+    // if (targetData.end === time) {
+    //   return true;
+    // }
     return false;
   };
 
@@ -161,8 +157,8 @@ const GanttChart: React.FC = () => {
     );
   };
 
-  if (timeSlots.length === 0) {
-    return <div>Loading...</div>;
+  if (timeSlots.length === 0 || !spots.length) {
+    return <div>観光地を選択してください</div>;
   }
 
   return (
@@ -170,12 +166,12 @@ const GanttChart: React.FC = () => {
       {/* 観光地名 */}
       <div className="w-64 flex-shrink-0">
         <div className="font-bold h-8 flex items-center justify-center bg-gray-200">観光地名</div>
-        {activities.length &&
-          activities.map((spot) => (
-            <div key={spot.id} className="h-16 flex items-center justify-center border-b border-gray-300 bg-gray-100">
-              {spot.spot}
+        {spots.length &&
+          spots.map((spot, id) => (
+            <div key={id} className="h-16 flex items-center justify-center border-b border-gray-300 bg-gray-100">
+              {spot.name}
               <div>
-                ({spot.start} ~ {spot.end})
+                ({spot.stay.start} ~ {spot.stay.end})
               </div>
             </div>
           ))}
@@ -201,28 +197,24 @@ const GanttChart: React.FC = () => {
           onDragEnd={handleDragEnd}
           onDragMove={handleDragMove}
         >
-          {activities.map((spot) => (
-            <div
-              key={spot.id}
-              className="flex h-16 items-center border-b "
-              style={{ width: `${timeSlots.length * 80}px` }}
-            >
+          {spots.map((spot, id) => (
+            <div key={id} className="flex h-16 items-center border-b " style={{ width: `${timeSlots.length * 80}px` }}>
               {timeSlots.map((timeSlot, index) => {
                 const timeRange = [0, 15, 30, 45];
                 return (
                   <Fragment key={index}>
                     {timeRange.map((minute) => {
-                      const isStart = isStartPoint(timeSlot.split(':')[0], minute, spot.id);
-                      const isEnd = isEndPoint(Number.parseInt(timeSlot.split(':')[0]), minute, spot.id);
-                      const isDragged = spot.isDragged;
+                      const isStart = isStartPoint(timeSlot.split(':')[0], minute, id.toString());
+                      const isEnd = isEndPoint(Number.parseInt(timeSlot.split(':')[0]), minute, id.toString());
+                      const isDragged = false; //仮
                       return (
                         <DroppableHandle
                           key={minute}
-                          id={`${spot.id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
+                          id={`${id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
                         >
-                          {isTimeWithinRange(timeSlot.split(':')[0], minute, spot.start, spot.end) && (
+                          {isTimeWithinRange(timeSlot.split(':')[0], minute, spot.stay.start, spot.stay.end) && (
                             <DraggableHandle
-                              id={`${spot.id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
+                              id={`${id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
                               isStart={false}
                               isEnd={false}
                               isDragged={isDragged}
@@ -232,7 +224,7 @@ const GanttChart: React.FC = () => {
                           )}
                           {isStart && (
                             <DraggableHandle
-                              id={spot.id}
+                              id={id.toString()}
                               isStart
                               isEnd={false}
                               isDragged={isDragged}
@@ -242,7 +234,7 @@ const GanttChart: React.FC = () => {
                           )}
                           {isEnd && (
                             <DraggableHandle
-                              id={spot.id}
+                              id={id.toString()}
                               isStart={false}
                               isEnd
                               isDragged={isDragged}

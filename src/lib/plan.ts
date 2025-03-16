@@ -1,4 +1,198 @@
+import { DateRange } from 'react-day-picker';
+import { z } from 'zod';
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+
+import { TravelPlanType, TripInfo } from '@/types/plan';
+
+import { removeTimeFromDate } from './utils';
+
+export const schema = z.object({
+  title: z
+    .string()
+    .min(1, { message: 'タイトルは必須です' })
+    .max(50, { message: 'タイトルの上限を超えています。50文字以下で入力してください' }),
+  start_date: z.date({ message: '予定日の開始日を入力してください' }),
+  end_date: z.date({ message: '予定日の終了日を入力してください' }),
+  tripInfo: z.array(
+    z.object({
+      date: z.date(),
+      genre_id: z.number(),
+      transportation_method: z.array(z.number()).refine((value) => value.some((item) => item), {
+        message: '移動手段は最低でも1つ以上選択してください',
+      }),
+      memo: z.string().optional(),
+    }),
+  ),
+  plans: z.array(
+    z.object({
+      date: z.date(),
+      departure: z.object({
+        name: z.string().min(1, { message: '出発地は必須です' }),
+        latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
+        longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
+      }),
+      destination: z.object({
+        name: z.string().min(1, { message: '目的地は必須です' }),
+        latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
+        longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
+      }),
+      spots: z.object({
+        name: z.string().min(1, { message: '観光地名は必須です' }),
+        latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
+        longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
+        stay: z.object({
+          start: z.string().time(),
+          end: z.string().time(),
+        }),
+        image: z.string().url().optional(),
+        rating: z.number().optional(),
+        category: z.array(z.string()),
+        catchphrase: z.string().optional(),
+        description: z.string().optional(),
+        nearestStation: z
+          .object({
+            name: z.string(),
+            walkingTime: z.number(),
+            latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
+            longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
+          })
+          .optional(),
+      }),
+    }),
+  ),
+});
+
+export type FormData = z.infer<typeof schema>;
+
+interface FormState {
+  title: string;
+  imageUrl?: string;
+  start_date: Date;
+  end_date: Date;
+  tripInfo: TripInfo[];
+  plans: TravelPlanType[];
+  errors: Partial<Record<keyof FormData, string>>;
+  setTripInfo: (
+    date: Date,
+    name: 'date' | 'genre_id' | 'transportation_method' | 'memo',
+    value: Date | number | number[] | string,
+  ) => void;
+  simulationStatus: { date: Date; status: number }[] | null;
+  setSimulationStatus: (status: { date: Date; status: number }) => void;
+  setPlan: (date: Date, name, value) => void;
+  setFields: <K extends keyof FormState>(field: K, value: FormState[K]) => void;
+  setErrors: (errors: Partial<Record<keyof FormData, string>>) => void;
+  setRangeDate: (date: DateRange | undefined) => void;
+  resetForm: () => void;
+}
+
+export const useStoreForPlanning = create<FormState>()(
+  immer(
+    devtools((set) => ({
+      title: '',
+      imageUrl: '',
+      start_date: new Date(),
+      end_date: new Date(),
+      tripInfo: [],
+      plans: [
+        {
+          date: new Date(),
+          departure: { name: '', latitude: 34.7335, longitude: 135.5003 },
+          destination: { name: '', latitude: 34.7335, longitude: 135.5003 },
+          spots: [],
+        },
+      ],
+      simulationStatus: null,
+      setSimulationStatus: (status) => {
+        set((state) => {
+          if (state.simulationStatus) {
+            const existingStatusIndex = state.simulationStatus.findIndex(
+              (info) => info.date.toLocaleDateString('ja-JP') === status.date.toLocaleDateString('ja-JP'),
+            );
+            if (existingStatusIndex >= 0) {
+              state.simulationStatus[existingStatusIndex] = {
+                ...state.simulationStatus[existingStatusIndex],
+                status: status.status,
+              };
+            } else {
+              state.simulationStatus.push({
+                date: removeTimeFromDate(status.date),
+                status: status.status,
+              });
+            }
+          } else {
+            state.simulationStatus = [
+              {
+                date: removeTimeFromDate(status.date),
+                status: status.status,
+              },
+            ];
+          }
+        });
+      },
+      errors: {},
+      setTripInfo: (date, name, value) => {
+        set((state) => {
+          const existingTripInfoIndex = state.tripInfo.findIndex(
+            (info) => info.date.toDateString() === date.toDateString(),
+          );
+          if (existingTripInfoIndex >= 0) {
+            state.tripInfo[existingTripInfoIndex] = {
+              ...state.tripInfo[existingTripInfoIndex],
+              [name]: value,
+            };
+          } else {
+            state.tripInfo.push({
+              date: removeTimeFromDate(date),
+              genre_id: name === 'genre_id' ? Number(value) : 0,
+              transportation_method: name === 'transportation_method' ? (value as number[]) : [],
+              memo: name === 'memo' ? (value as string) : '',
+            });
+          }
+        });
+      },
+      setPlan: (date, name, value) => {
+        set((state) => {
+          const existingTripInfoIndex = state.plans.findIndex(
+            (info) => info.date.toDateString() === date.toDateString(),
+          );
+          if (existingTripInfoIndex >= 0) {
+            state.plans[existingTripInfoIndex] = {
+              ...state.plans[existingTripInfoIndex],
+              [name]:
+                name === 'destination' || name === 'departure'
+                  ? { name: value.name, latitude: value.latitude, longitude: value.longitude }
+                  : value,
+            };
+          } else {
+            state.plans.push({
+              date: removeTimeFromDate(date),
+              destination:
+                name === 'destination'
+                  ? { name: value.name, latitude: value.latitude, longitude: value.longitude }
+                  : { name: '', latitude: 0, longitude: 0 },
+              departure:
+                name === 'departure'
+                  ? { name: value.name, latitude: value.latitude, longitude: value.longitude }
+                  : { name: '', latitude: 0, longitude: 0 },
+              spots: name === 'spots' ? value : [],
+            });
+          }
+        });
+      },
+      setFields: (field, value) =>
+        set((state) => {
+          state.errors[field] = '';
+          state[field] = value;
+        }),
+      setRangeDate: (date) => set((state) => ({ ...state, start_date: date?.from, end_date: date?.to })),
+      setErrors: (errors) => set((state) => ({ ...state, errors })),
+      resetForm: () => set((state) => ({ ...state, errors: {} })),
+    })),
+  ),
+);
 
 type Departure = {
   lat: number;
@@ -18,34 +212,11 @@ export type PlaceInfo = {
 };
 
 type Actions = {
-  getDeparture: () => Departure;
-  setDeparture: (departure: Departure) => void;
   getNearBySpot: () => PlaceInfo[];
   setNearBySpot: (placeInfo: PlaceInfo[]) => void;
 };
 
 let map: google.maps.Map;
-
-export const useDeparture = create<Departure & { spot: PlaceInfo[] } & Actions>((set, get) => ({
-  lat: 35.68238,
-  lng: 139.76556,
-  spot: [],
-  getDeparture: () => ({ lat: get().lat, lng: get().lng }),
-  setDeparture: (departure: Departure) => set((state) => ({ ...state, ...departure })),
-  getNearBySpot: () => (get().spot.length > 0 ? get().spot : []),
-  setNearBySpot: (newSpots: PlaceInfo[]) =>
-    set((state) => {
-      const mergedSpots = [...state.spot];
-
-      newSpots.forEach((newSpot) => {
-        if (!mergedSpots.some((spot) => spot.id === newSpot.id)) {
-          mergedSpots.push(newSpot);
-        }
-      });
-
-      return { ...state, spot: mergedSpots };
-    }),
-}));
 
 export async function nearBySearch(position: Departure): Promise<PlaceInfo[]> {
   const { Place, SearchNearbyRankPreference } = (await google.maps.importLibrary(

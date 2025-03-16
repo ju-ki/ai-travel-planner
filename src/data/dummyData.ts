@@ -1,0 +1,275 @@
+import { TravelPlanType } from '@/types/plan';
+
+export const initialActivities: TravelPlanType = {
+  date: new Date('2025-3-10'),
+  departure: {
+    name: '新大阪駅',
+    latitude: 34.73345,
+    longitude: 135.50091,
+  },
+  spots: [
+    {
+      name: '大阪城',
+      lat: 34.687315,
+      lng: 135.525929,
+      stay: { start: '09:00', end: '11:15' },
+      transport: { name: '電車', time: '20分' },
+      image: '/images/osaka-castle.jpg',
+      rating: 4.7,
+      category: ['歴史', '文化'],
+      catchphrase: '大阪のシンボル、戦国の名城',
+      description: '豊臣秀吉によって築かれた大阪城。壮大な天守閣からは、大阪の街を一望できます。',
+      nearestStation: {
+        name: '大阪城公園駅',
+        walkingTime: '10分',
+      },
+    },
+    {
+      name: '道頓堀',
+      lat: 34.668907,
+      lng: 135.501291,
+      stay: { start: '12:00', end: '13:30' },
+      transport: { name: '電車', time: '15分' },
+      image: '/images/dotonbori.jpg',
+      rating: 4.6,
+      category: ['グルメ', '観光'],
+      catchphrase: 'グリコ看板でおなじみの食い倒れの街',
+      description: '道頓堀は大阪を代表する繁華街。たこ焼きやお好み焼きを食べ歩きしながら観光を楽しめます。',
+      nearestStation: {
+        name: 'なんば駅',
+        walkingTime: '5分',
+      },
+    },
+    {
+      name: '通天閣',
+      lat: 34.652525,
+      lng: 135.506225,
+      stay: { start: '14:00', end: '15:45' },
+      transport: { name: '徒歩', time: '10分' },
+      image: '/images/tsutenkaku.jpg',
+      rating: 4.5,
+      category: ['観光', '都市'],
+      catchphrase: '新世界のシンボルタワー',
+      description: '通天閣は大阪のランドマークのひとつ。展望台からは大阪市内の絶景を楽しめます。',
+      nearestStation: {
+        name: '恵美須町駅',
+        walkingTime: '7分',
+      },
+    },
+    {
+      name: 'あべのハルカス',
+      lat: 34.645396,
+      lng: 135.513446,
+      stay: { start: '16:00', end: '17:00' },
+      transport: { name: '電車', time: '10分' },
+      image: '/images/abenoharukas.jpg',
+      rating: 4.8,
+      category: ['都市', '展望'],
+      catchphrase: '日本一高い超高層ビル',
+      description:
+        '高さ300mを誇るあべのハルカス。展望台『ハルカス300』からは、大阪だけでなく神戸や京都まで一望できます。',
+      nearestStation: {
+        name: '天王寺駅',
+        walkingTime: '3分',
+      },
+    },
+  ],
+  destination: {
+    name: '新大阪駅',
+    latitude: 34.73345,
+    longitude: 135.50091,
+    transport: { name: '電車', time: '20分' },
+  },
+};
+
+export const osakaKyotoTravelPlan: TravelPlanType = {
+  date: new Date('2025-3-11'),
+  departure: {
+    name: '新大阪駅',
+    latitude: 34.73345,
+    longitude: 135.50091,
+  },
+  spots: [
+    {
+      name: '大阪城',
+      lat: 34.687315,
+      lng: 135.525929,
+      stay: { start: '09:00', end: '10:30' },
+      transport: { name: '電車', time: '15分' },
+      nearestStation: { name: '大阪城公園駅', walkingTime: '10分' },
+      image: '/images/osaka-castle.jpg',
+      rating: 4.7,
+      category: ['歴史', '文化'],
+      catchphrase: '大阪のシンボル、戦国の名城',
+      description: '豊臣秀吉によって築かれた大阪城。壮大な天守閣からは、大阪の街を一望できます。',
+    },
+    {
+      name: '清水寺',
+      lat: 34.9967,
+      lng: 135.785,
+      stay: { start: '12:00', end: '13:30' },
+      transport: { name: '電車', time: '45分' },
+      nearestStation: { name: '清水五条駅', walkingTime: '15分' },
+      image: '/images/kiyomizu.jpg',
+      rating: 4.8,
+      category: ['歴史', '文化'],
+      catchphrase: '京都の象徴、世界遺産の名所',
+      description: '清水寺は、京都の象徴的な寺院で、壮大な木造の本堂と美しい景観が魅力です。',
+    },
+    {
+      name: '伏見稲荷大社',
+      lat: 34.8666,
+      lng: 135.7323,
+      stay: { start: '14:00', end: '15:30' },
+      transport: { name: '電車', time: '15分' },
+      nearestStation: { name: '伏見稲荷駅', walkingTime: '5分' },
+      image: '/images/fushimi-inari.jpg',
+      rating: 4.7,
+      category: ['歴史', '観光'],
+      catchphrase: '千本鳥居で有名な神社',
+      description: '伏見稲荷大社は、千本鳥居で知られる神社で、人気の観光地です。',
+    },
+  ],
+  destination: {
+    name: '京都駅',
+    latitude: 35.0116,
+    longitude: 135.7681,
+    transport: { name: '電車', time: '40分' },
+  },
+};
+
+export const tokyoTravelPlan: TravelPlanType = {
+  date: new Date('2025-3-12'),
+  departure: {
+    name: '東京駅',
+    latitude: 35.682839,
+    longitude: 139.759455,
+  },
+  spots: [
+    {
+      name: '浅草寺',
+      lat: 35.7148,
+      lng: 139.7967,
+      stay: { start: '09:00', end: '10:30' },
+      transport: { name: '電車', time: '10分' },
+      nearestStation: { name: '浅草駅', walkingTime: '5分' },
+      image: '/images/asakusa.jpg',
+      rating: 4.6,
+      category: ['歴史', '文化'],
+      catchphrase: '東京の象徴的な寺院',
+      description: '浅草寺は東京で最も有名な寺院で、雷門や周辺の繁華街も楽しめます。',
+    },
+    {
+      name: '東京タワー',
+      lat: 35.6586,
+      lng: 139.7454,
+      stay: { start: '11:00', end: '12:30' },
+      transport: { name: '電車', time: '15分' },
+      nearestStation: { name: '赤羽橋駅', walkingTime: '7分' },
+      image: '/images/tokyo-tower.jpg',
+      rating: 4.5,
+      category: ['観光', '都市'],
+      catchphrase: '東京を一望できるタワー',
+      description: '東京タワーは、東京のシンボルで、展望台からは東京市内を一望できます。',
+    },
+    {
+      name: '秋葉原',
+      lat: 35.6998,
+      lng: 139.7745,
+      stay: { start: '13:00', end: '14:30' },
+      transport: { name: '電車', time: '10分' },
+      nearestStation: { name: '秋葉原駅', walkingTime: '2分' },
+      image: '/images/akihabara.jpg',
+      rating: 4.7,
+      category: ['ショッピング', '文化'],
+      catchphrase: '電気街として有名なオタクの聖地',
+      description: '秋葉原は、電子機器やアニメ・マンガのショップが集まる人気のエリアです。',
+    },
+  ],
+  destination: {
+    name: '新宿駅',
+    latitude: 35.6895,
+    longitude: 139.6917,
+    transport: { name: '電車', time: '25分' },
+  },
+};
+
+export const sapporoTravelPlan: TravelPlanType = {
+  date: new Date('2025-3-13'),
+  departure: {
+    name: '札幌駅',
+    latitude: 43.0687,
+    longitude: 141.3508,
+  },
+  spots: [
+    {
+      name: '大通公園',
+      lat: 43.0623,
+      lng: 141.3544,
+      stay: { start: '09:00', end: '10:30' },
+      transport: { name: '徒歩', time: '5分' },
+      nearestStation: { name: '大通駅', walkingTime: '3分' },
+      image: '/images/odori-park.jpg',
+      rating: 4.6,
+      category: ['自然', '観光'],
+      catchphrase: '四季折々の美しい公園',
+      description: '大通公園は札幌市中心部にある広大な公園で、季節ごとに美しい景色が楽しめます。',
+    },
+    {
+      name: '札幌時計台',
+      lat: 43.0687,
+      lng: 141.3509,
+      stay: { start: '11:00', end: '12:00' },
+      transport: { name: '徒歩', time: '10分' },
+      nearestStation: { name: '時計台前駅', walkingTime: '5分' },
+      image: '/images/sapporo-clock-tower.jpg',
+      rating: 4.5,
+      category: ['歴史', '文化'],
+      catchphrase: '北海道の象徴的な建物',
+      description: '札幌時計台は、札幌の象徴的な歴史的建物で、観光名所となっています。',
+    },
+    {
+      name: 'すすきの',
+      lat: 43.0615,
+      lng: 141.3544,
+      stay: { start: '13:00', end: '15:00' },
+      transport: { name: '徒歩', time: '5分' },
+      nearestStation: { name: 'すすきの駅', walkingTime: '1分' },
+      image: '/images/susukino.jpg',
+      rating: 4.7,
+      category: ['ショッピング', 'ナイトライフ'],
+      catchphrase: '札幌の夜を楽しむ街',
+      description: 'すすきのは、北海道最大の繁華街で、夜の食事やショッピングが楽しめます。',
+    },
+  ],
+  destination: {
+    name: '新千歳空港',
+    latitude: 42.7756,
+    longitude: 141.6922,
+    transport: { name: '電車', time: '40分' },
+  },
+};
+
+export const department = [
+  { name: '自宅', latitude: 34.7025, longitude: 135.4959 }, // 大阪
+  { name: 'ホテルA', latitude: 35.6895, longitude: 139.6917 }, // 東京
+  { name: '旅館B', latitude: 34.9858, longitude: 135.7587 }, // 京都
+  { name: 'ゲストハウスC', latitude: 43.0664, longitude: 141.3507 }, // 札幌
+];
+
+export const destinations = [
+  { name: 'ホテルA', latitude: 35.6895, longitude: 139.6917 }, // 東京
+  { name: '旅館B', latitude: 34.9858, longitude: 135.7587 }, // 京都
+  { name: 'ゲストハウスC', latitude: 43.0664, longitude: 141.3507 }, // 札幌
+  { name: '自宅', latitude: 34.7025, longitude: 135.4959 }, // 大阪
+];
+
+export const transportationMethods = [
+  { id: 1, name: '徒歩' },
+  { id: 2, name: '自転車' },
+  { id: 3, name: '車' },
+  { id: 4, name: 'バス' },
+  { id: 5, name: '電車' },
+  { id: 6, name: '飛行機' },
+  { id: 7, name: '船' },
+];
