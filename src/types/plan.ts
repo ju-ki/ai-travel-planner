@@ -37,6 +37,7 @@ export type Spot = {
   lng: number;
   stay: StayDuration;
   transport: Transport;
+  memo?: string;
   image?: string; // 画像URL (省略可能)
   rating: number; // 例: 4.7
   category: string[]; // 例: ["文化", "歴史"]

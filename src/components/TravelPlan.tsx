@@ -6,6 +6,9 @@ import Image from 'next/image';
 import { TravelPlanType } from '@/types/plan';
 import { useStoreForPlanning } from '@/lib/plan';
 
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+
 const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
   const fields = useStoreForPlanning();
   if (!travelPlan) {
@@ -15,10 +18,10 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
   const targetSimulationStatus = fields.simulationStatus
     ? fields.simulationStatus.filter(
         (val) => val.date.toLocaleDateString('ja-JP') == travelPlan.date.toLocaleDateString('ja-JP'),
-      )[0].status
+      )[0]?.status
     : null;
 
-  const { departure, spots, destination } = travelPlan;
+  const { departure, spots, destination, date } = travelPlan;
 
   const transportIcons: Record<string, JSX.Element> = {
     電車: <Train className="w-5 h-5 text-blue-500" />,
@@ -114,12 +117,21 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
               ))}
             </div>
 
-            {/* キャッチコピー */}
-
             {/* 説明 (吹き出し風) */}
             <div className="mt-4 bg-gray-100 p-3 rounded-lg shadow-sm">
+              {/* キャッチコピー */}
               <p className="mb-2 text-sm font-semibold text-gray-700">{spot.catchphrase}</p>
               <p className="text-gray-600 text-sm">{spot.description}</p>
+            </div>
+
+            {/* 観光スポットに対するメモ */}
+            <div className="mt-4 border-t border-gray-300 py-6">
+              <Label className="font-semibold text-lg">メモ</Label>
+              <Textarea
+                placeholder="この観光スポットに対するメモや注意点を記載"
+                value={spot.memo || ''}
+                onChange={(e) => fields.setSpots(new Date(date), { ...spot, memo: e.target.value }, false)}
+              />
             </div>
           </div>
         </div>
