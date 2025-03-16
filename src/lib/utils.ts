@@ -53,3 +53,31 @@ export function updatedTime(baseTime: string, diffTime: string): string {
   // HH:mm 形式に整形
   return `${String(updatedHours).padStart(2, '0')}:${String(updatedMinutes).padStart(2, '0')}`;
 }
+
+/**
+ *
+ * @param start 開始日付
+ * @param end   終了日付
+ * @returns 間の日付を含んだ日付のリスト
+ */
+export const getDatesBetween = (start: Date, end: Date) => {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+
+  // 日数を整数にするため Math.round() を使用
+  const days = Math.round((endTime - startTime) / (1000 * 60 * 60 * 24)) + 1;
+
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(startTime + i * (1000 * 60 * 60 * 24));
+    return date.toLocaleDateString('ja-JP'); // YYYY/MM/DD 形式
+  });
+};
+
+/**
+ * YYYY-mm-dd形式に変換するメソッド
+ * @param date
+ * @returns
+ */
+export const removeTimeFromDate = (date: Date): Date => {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+};
