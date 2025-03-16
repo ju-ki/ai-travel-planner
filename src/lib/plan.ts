@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { TravelPlanType, TripInfo } from '@/types/plan';
+import { Location, Spot, TravelPlanType, TripInfo } from '@/types/plan';
 
 import { removeTimeFromDate } from './utils';
 
@@ -81,7 +81,8 @@ interface FormState {
   ) => void;
   simulationStatus: { date: Date; status: number }[] | null;
   setSimulationStatus: (status: { date: Date; status: number }) => void;
-  setPlan: (date: Date, name, value) => void;
+  setPlan: (date: Date, name: 'destination' | 'departure', value: Location) => void;
+  setSpots: (date: Date, spot: Spot, isDeleted: boolean) => void;
   setFields: <K extends keyof FormState>(field: K, value: FormState[K]) => void;
   setErrors: (errors: Partial<Record<keyof FormData, string>>) => void;
   setRangeDate: (date: DateRange | undefined) => void;
@@ -177,14 +178,28 @@ export const useStoreForPlanning = create<FormState>()(
                 name === 'departure'
                   ? { name: value.name, latitude: value.latitude, longitude: value.longitude }
                   : { name: '', latitude: 0, longitude: 0 },
-              spots: name === 'spots' ? value : [],
+              spots: [],
             });
+          }
+        });
+      },
+      setSpots: (date, spot, isDeleted = false) => {
+        set((state) => {
+          const existingPlansIndex = state.plans.findIndex(
+            (info) => info.date.toLocaleDateString('ja-JP') === date.toLocaleDateString('ja-JP'),
+          );
+          const existingSpotIndex = state.plans[existingPlansIndex].spots.findIndex((info) => info.id === spot.id);
+          if (existingSpotIndex >= 0 && !isDeleted) {
+            state.plans[existingPlansIndex].spots[existingSpotIndex] = spot;
+          } else if (existingSpotIndex >= 0 && isDeleted) {
+            state.plans[existingPlansIndex].spots.splice(existingSpotIndex, 1);
+          } else if (existingSpotIndex < 0 && !isDeleted) {
+            state.plans[existingPlansIndex].spots.push(spot);
           }
         });
       },
       setFields: (field, value) =>
         set((state) => {
-          state.errors[field] = '';
           state[field] = value;
         }),
       setRangeDate: (date) => set((state) => ({ ...state, start_date: date?.from, end_date: date?.to })),
