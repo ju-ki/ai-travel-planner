@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Clock, Train, Bus, FootprintsIcon, Info } from 'lucide-react';
+import { MapPin, Clock, Train, Bus, FootprintsIcon, Info, Check } from 'lucide-react';
 import Image from 'next/image';
 
 import { TravelPlanType } from '@/types/plan';
@@ -38,6 +38,19 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
           <span>観光地を選択して、上記のシミュレーションボタンを押下してください</span>
         ) : (
           <span>シミュレーション中です</span>
+        )}
+      </div>
+    );
+  }
+
+  if (!targetSimulationStatus || targetSimulationStatus === 9) {
+    return (
+      <div className="flex items-center space-x-2 my-10">
+        {!targetSimulationStatus || targetSimulationStatus === 9 ? <Check className="w-5 h-5 text-red-400" /> : <></>}
+        {!targetSimulationStatus || targetSimulationStatus === 9 ? (
+          <span className="text-red-500">未入力項目があります。各項目の内容を確認してください。</span>
+        ) : (
+          <span></span>
         )}
       </div>
     );

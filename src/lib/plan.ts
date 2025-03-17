@@ -74,6 +74,9 @@ interface FormState {
   tripInfo: TripInfo[];
   plans: TravelPlanType[];
   errors: Partial<Record<keyof FormData, string>>;
+  tripInfoErrors: Partial<Record<string, Partial<Record<keyof TripInfo, string>>>>;
+  planErrors: Partial<Record<string, Partial<Record<keyof TravelPlanType, string>>>>;
+  spotErrors: Partial<Record<string, Partial<Record<keyof Spot, string>>>>;
   setTripInfo: (
     date: Date,
     name: 'date' | 'genre_id' | 'transportation_method' | 'memo',
@@ -85,7 +88,11 @@ interface FormState {
   setSpots: (date: Date, spot: Spot, isDeleted: boolean) => void;
   setFields: <K extends keyof FormState>(field: K, value: FormState[K]) => void;
   setErrors: (errors: Partial<Record<keyof FormData, string>>) => void;
+  setTripInfoErrors: (date: Date, errors: Partial<Record<keyof TripInfo, string>>) => void;
+  setSpotErrors: (date: Date, errors: Partial<Record<keyof Spot, string>>) => void;
+  setPlanErrors: (date: Date, errors: Partial<Record<keyof TravelPlanType, string>>) => void;
   setRangeDate: (date: DateRange | undefined) => void;
+  resetErrors: () => void;
   resetForm: () => void;
 }
 
@@ -134,6 +141,9 @@ export const useStoreForPlanning = create<FormState>()(
         });
       },
       errors: {},
+      tripInfoErrors: {},
+      spotErrors: {},
+      planErrors: {},
       setTripInfo: (date, name, value) => {
         set((state) => {
           const existingTripInfoIndex = state.tripInfo.findIndex(
@@ -204,6 +214,34 @@ export const useStoreForPlanning = create<FormState>()(
         }),
       setRangeDate: (date) => set((state) => ({ ...state, start_date: date?.from, end_date: date?.to })),
       setErrors: (errors) => set((state) => ({ ...state, errors })),
+      setTripInfoErrors: (date, errors) =>
+        set((state) => {
+          const dateKey = date.toLocaleDateString('ja-JP');
+          state.tripInfoErrors[dateKey] = {
+            ...state.tripInfoErrors[dateKey],
+            ...errors,
+          };
+          return state;
+        }),
+      setPlanErrors: (date, errors) =>
+        set((state) => {
+          const dateKey = date.toLocaleDateString('ja-JP');
+          state.planErrors[dateKey] = {
+            ...state.planErrors[dateKey],
+            ...errors,
+          };
+          return state;
+        }),
+      setSpotErrors: (date, errors) =>
+        set((state) => {
+          const dateKey = date.toLocaleDateString('ja-JP');
+          state.spotErrors[dateKey] = {
+            ...state.spotErrors[dateKey],
+            ...errors,
+          };
+          return state;
+        }),
+      resetErrors: () => set((state) => ({ ...state, tripInfoErrors: {}, planErrors: {}, spotErrors: {} })),
       resetForm: () => set((state) => ({ ...state, errors: {} })),
     })),
   ),

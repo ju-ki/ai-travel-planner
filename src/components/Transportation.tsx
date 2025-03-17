@@ -42,6 +42,9 @@ const Transportation = ({ date }: { date: string }) => {
           </div>
         ))}
       </div>
+      {fields.tripInfoErrors && (
+        <span className="text-red-500">{fields.tripInfoErrors[date]?.transportation_method}</span>
+      )}
     </div>
   );
 };

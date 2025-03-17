@@ -57,6 +57,8 @@ const SpotSelection = ({ date }: { date: string }) => {
           </Command>
         </PopoverContent>
       </Popover>
+
+      {fields.planErrors && <span className="text-red-500">{fields.planErrors[date]?.spots}</span>}
     </div>
   );
 };

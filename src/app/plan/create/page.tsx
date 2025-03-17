@@ -99,16 +99,11 @@ const TravelPlanCreate = () => {
                   />
                 </PopoverContent>
               </Popover>
-              {/* <div>
-                {methods.formState.errors.start_date && (
-                  <span className="text-red-500">{methods.formState.errors.start_date.message}</span>
+              <div className="my-1">
+                {fields.errors.start_date && (
+                  <span className="text-red-500">{fields.errors.start_date.toString()}</span>
                 )}
               </div>
-              <div>
-                {methods.formState.errors.end_date && (
-                  <span className="text-red-500">{methods.formState.errors.end_date.message}</span>
-                )}
-              </div> */}
             </div>
 
             {/* 選択した日付分だけタブが生成されるようにする */}
