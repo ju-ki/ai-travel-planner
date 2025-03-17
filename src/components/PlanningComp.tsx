@@ -39,15 +39,12 @@ const PlanningComp = ({ date }: { date: string }) => {
             <SelectItem value="5">食べ歩き</SelectItem>
           </SelectContent>
         </Select>
+
+        {fields.tripInfoErrors && <span className="text-red-500">{fields.tripInfoErrors[date]?.genre_id}</span>}
       </div>
       {/* メインとなる移動手段 */}
       <div className="space-y-4">
         <Transportation date={date} />
-        {/* <div>
-          {methods.formState.errors.transportation_method && (
-            <span className=" text-red-500">{methods.formState.errors.transportation_method.message}</span>
-          )}
-        </div> */}
       </div>
 
       {/* 出発地 */}
@@ -67,6 +64,8 @@ const PlanningComp = ({ date }: { date: string }) => {
           value={fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]?.memo || ''}
           onChange={(e) => fields.setTripInfo(new Date(date), 'memo', e.target.value)}
         />
+
+        {fields.tripInfoErrors && <span className="text-red-500">{fields.tripInfoErrors[date]?.memo}</span>}
       </div>
 
       {/* スポット選択 */}
