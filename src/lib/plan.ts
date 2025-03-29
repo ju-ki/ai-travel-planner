@@ -38,29 +38,32 @@ export const schema = z.object({
         latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
         longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
       }),
-      spots: z.object({
-        name: z.string().min(1, { message: '観光地名は必須です' }),
-        latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
-        longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
-        stay: z.object({
-          start: z.string().time(),
-          end: z.string().time(),
+      spots: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string().min(1, { message: '観光地名は必須です' }),
+          latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
+          longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
+          stay: z.object({
+            start: z.string().time(),
+            end: z.string().time(),
+          }),
+          memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),
+          image: z.string().url().optional(),
+          rating: z.number().optional(),
+          category: z.array(z.string()),
+          catchphrase: z.string().optional(),
+          description: z.string().optional(),
+          nearestStation: z
+            .object({
+              name: z.string(),
+              walkingTime: z.number(),
+              latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
+              longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
+            })
+            .optional(),
         }),
-        memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),
-        image: z.string().url().optional(),
-        rating: z.number().optional(),
-        category: z.array(z.string()),
-        catchphrase: z.string().optional(),
-        description: z.string().optional(),
-        nearestStation: z
-          .object({
-            name: z.string(),
-            walkingTime: z.number(),
-            latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
-            longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
-          })
-          .optional(),
-      }),
+      ),
     }),
   ),
 });

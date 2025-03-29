@@ -13,20 +13,25 @@ import { cn, getDatesBetween } from '@/lib/utils';
 import { useStoreForPlanning } from '@/lib/plan';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanningComp from '@/components/PlanningComp';
+import { dummyData } from '@/data/dummyData';
 
 const TravelPlanCreate = () => {
   const fields = useStoreForPlanning();
 
-  const handleCreatePlan = () => {
-    console.log('旅行計画が作成されました:');
+  const handleCreatePlan = async () => {
+    console.log('旅行計画が作成されました');
+    fetch('/api/trips/create', { method: 'POST', body: JSON.stringify(dummyData) })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
   };
 
   return (
     <div>
-      <form
-        onSubmit={() => {
-          handleCreatePlan();
-        }}
+      <div
+        // onSubmit={() => {
+        //   handleCreatePlan();
+        // }}
         className="container mx-auto p-4"
       >
         <Card className="w-full max-w-4xl mx-auto">
@@ -124,13 +129,13 @@ const TravelPlanCreate = () => {
 
             {/* 作成ボタン */}
             <div className="space-y-2">
-              <Button type="submit" role="button" className="w-full">
+              <Button onClick={() => handleCreatePlan()} type="button" role="button" className="w-full">
                 旅行計画を作成
               </Button>
             </div>
           </CardContent>
         </Card>
-      </form>
+      </div>
     </div>
   );
 };

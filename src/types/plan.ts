@@ -20,7 +20,9 @@ type Transport = {
 
 type NearestStation = {
   name: string; // 最寄駅の名前
-  walkingTime: string; // 徒歩時間 (例: "5分")
+  walkingTime: number; // 徒歩時間（分）
+  latitude: number;
+  longitude: number;
 };
 
 export type TripInfo = {
@@ -33,10 +35,10 @@ export type TripInfo = {
 export type Spot = {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
+  latitude: number;
+  longitude: number;
   stay: StayDuration;
-  transport: Transport;
+  transport?: Transport;
   memo?: string;
   image?: string; // 画像URL (省略可能)
   rating: number; // 例: 4.7

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,79 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id        Int        @id @default(autoincrement())
+  title     String     @db.VarChar(50)
+  startDate DateTime
+  endDate   DateTime
+  userId    String     @db.VarChar(255)
+  plans     Plan[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tripInfo  TripInfo[]
+}
+
+model TripInfo {
+  id                    Int      @id @default(autoincrement())
+  tripId                Int
+  date                  DateTime
+  genreId               Int
+  transportationMethods Int[]
+  memo                  String?
+  trip                  Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model Plan {
+  id            Int      @id @default(autoincrement())
+  tripId        Int
+  date          DateTime
+  departureId   Int
+  destinationId Int
+  departure     Location @relation("departure", fields: [departureId], references: [id])
+  destination   Location @relation("destination", fields: [destinationId], references: [id])
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  spots         Spot[]
+}
+
+model Location {
+  id           Int    @id @default(autoincrement())
+  name         String @db.VarChar(255)
+  latitude     Float
+  longitude    Float
+  departures   Plan[] @relation("departure")
+  destinations Plan[] @relation("destination")
+}
+
+model Spot {
+  id             Int             @id @default(autoincrement())
+  planId         Int
+  name           String          @db.VarChar(255)
+  latitude       Float
+  longitude      Float
+  stayStart      DateTime
+  stayEnd        DateTime
+  memo           String?
+  image          String?
+  rating         Float?
+  categories     String[]
+  catchphrase    String?
+  description    String?
+  nearestStation NearestStation?
+  plan           Plan            @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+model NearestStation {
+  id          Int    @id @default(autoincrement())
+  spotId      Int    @unique
+  name        String @db.VarChar(255)
+  walkingTime Int
+  latitude    Float
+  longitude   Float
+  spot        Spot   @relation(fields: [spotId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id   String @id @db.VarChar(255)
+  trip Trip[]
 }
