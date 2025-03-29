@@ -17,7 +17,20 @@ export const getTripHandler = {
 
       const tripInfo = await prisma.trip.findMany({
         where: { userId: auth.userId },
-        include: { tripInfo: true },
+        include: {
+          tripInfo: true,
+          plans: {
+            include: {
+              departure: true,
+              destination: true,
+              spots: {
+                include: {
+                  nearestStation: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!tripInfo.length) {
