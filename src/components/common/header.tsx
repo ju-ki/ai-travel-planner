@@ -21,7 +21,7 @@ const Header = () => {
           <Link href="/plan/create" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
             プラン作成
           </Link>
-          <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/plan/list" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
             プラン一覧
           </Link>
           <SignOutButton>
@@ -58,7 +58,11 @@ const Header = () => {
                 >
                   プラン作成
                 </Link>
-                <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                <Link
+                  href="/plan/list"
+                  className="text-sm font-medium hover:underline underline-offset-4"
+                  prefetch={false}
+                >
                   プラン一覧
                 </Link>
                 <SignedIn>
