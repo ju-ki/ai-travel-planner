@@ -1,3 +1,4 @@
+import { FormData } from '@/lib/plan';
 import { TravelPlanType } from '@/types/plan';
 
 export const initialActivities: TravelPlanType = {
@@ -11,8 +12,8 @@ export const initialActivities: TravelPlanType = {
     {
       id: '1',
       name: '大阪城',
-      lat: 34.687315,
-      lng: 135.525929,
+      latitude: 34.687315,
+      longitude: 135.525929,
       stay: { start: '09:00', end: '11:15' },
       transport: { name: '電車', time: '20分' },
       image: '/images/osaka-castle.jpg',
@@ -22,14 +23,16 @@ export const initialActivities: TravelPlanType = {
       description: '豊臣秀吉によって築かれた大阪城。壮大な天守閣からは、大阪の街を一望できます。',
       nearestStation: {
         name: '大阪城公園駅',
-        walkingTime: '10分',
+        walkingTime: 10,
+        latitude: 34.6884,
+        longitude: 135.5339,
       },
     },
     {
       id: '2',
       name: '道頓堀',
-      lat: 34.668907,
-      lng: 135.501291,
+      latitude: 34.668907,
+      longitude: 135.501291,
       stay: { start: '12:00', end: '13:30' },
       transport: { name: '電車', time: '15分' },
       image: '/images/dotonbori.jpg',
@@ -39,14 +42,16 @@ export const initialActivities: TravelPlanType = {
       description: '道頓堀は大阪を代表する繁華街。たこ焼きやお好み焼きを食べ歩きしながら観光を楽しめます。',
       nearestStation: {
         name: 'なんば駅',
-        walkingTime: '5分',
+        walkingTime: 5,
+        latitude: 34.6687,
+        longitude: 135.5013,
       },
     },
     {
       id: '3',
       name: '通天閣',
-      lat: 34.652525,
-      lng: 135.506225,
+      latitude: 34.652525,
+      longitude: 135.506225,
       stay: { start: '14:00', end: '15:45' },
       transport: { name: '徒歩', time: '10分' },
       image: '/images/tsutenkaku.jpg',
@@ -56,14 +61,16 @@ export const initialActivities: TravelPlanType = {
       description: '通天閣は大阪のランドマークのひとつ。展望台からは大阪市内の絶景を楽しめます。',
       nearestStation: {
         name: '恵美須町駅',
-        walkingTime: '7分',
+        walkingTime: 7,
+        latitude: 34.6525,
+        longitude: 135.5062,
       },
     },
     {
       id: '4',
       name: 'あべのハルカス',
-      lat: 34.645396,
-      lng: 135.513446,
+      latitude: 34.645396,
+      longitude: 135.513446,
       stay: { start: '16:00', end: '17:00' },
       transport: { name: '電車', time: '10分' },
       image: '/images/abenoharukas.jpg',
@@ -74,7 +81,9 @@ export const initialActivities: TravelPlanType = {
         '高さ300mを誇るあべのハルカス。展望台『ハルカス300』からは、大阪だけでなく神戸や京都まで一望できます。',
       nearestStation: {
         name: '天王寺駅',
-        walkingTime: '3分',
+        walkingTime: 3,
+        latitude: 34.6454,
+        longitude: 135.5134,
       },
     },
   ],
@@ -97,11 +106,16 @@ export const osakaKyotoTravelPlan: TravelPlanType = {
     {
       id: '5',
       name: '大阪城',
-      lat: 34.687315,
-      lng: 135.525929,
+      latitude: 34.687315,
+      longitude: 135.525929,
       stay: { start: '09:00', end: '10:30' },
       transport: { name: '電車', time: '15分' },
-      nearestStation: { name: '大阪城公園駅', walkingTime: '10分' },
+      nearestStation: {
+        name: '大阪城公園駅',
+        walkingTime: 10,
+        latitude: 34.6884,
+        longitude: 135.5339,
+      },
       image: '/images/osaka-castle.jpg',
       rating: 4.7,
       category: ['歴史', '文化'],
@@ -111,11 +125,16 @@ export const osakaKyotoTravelPlan: TravelPlanType = {
     {
       id: '6',
       name: '清水寺',
-      lat: 34.9967,
-      lng: 135.785,
+      latitude: 34.9967,
+      longitude: 135.785,
       stay: { start: '12:00', end: '13:30' },
       transport: { name: '電車', time: '45分' },
-      nearestStation: { name: '清水五条駅', walkingTime: '15分' },
+      nearestStation: {
+        name: '清水五条駅',
+        walkingTime: 15,
+        latitude: 34.9967,
+        longitude: 135.785,
+      },
       image: '/images/kiyomizu.jpg',
       rating: 4.8,
       category: ['歴史', '文化'],
@@ -125,11 +144,16 @@ export const osakaKyotoTravelPlan: TravelPlanType = {
     {
       id: '7',
       name: '伏見稲荷大社',
-      lat: 34.8666,
-      lng: 135.7323,
+      latitude: 34.8666,
+      longitude: 135.7323,
       stay: { start: '14:00', end: '15:30' },
       transport: { name: '電車', time: '15分' },
-      nearestStation: { name: '伏見稲荷駅', walkingTime: '5分' },
+      nearestStation: {
+        name: '伏見稲荷駅',
+        walkingTime: 5,
+        latitude: 34.8666,
+        longitude: 135.7323,
+      },
       image: '/images/fushimi-inari.jpg',
       rating: 4.7,
       category: ['歴史', '観光'],
@@ -156,11 +180,16 @@ export const tokyoTravelPlan: TravelPlanType = {
     {
       id: '8',
       name: '浅草寺',
-      lat: 35.7148,
-      lng: 139.7967,
+      latitude: 35.7148,
+      longitude: 139.7967,
       stay: { start: '09:00', end: '10:30' },
       transport: { name: '電車', time: '10分' },
-      nearestStation: { name: '浅草駅', walkingTime: '5分' },
+      nearestStation: {
+        name: '浅草駅',
+        walkingTime: 5,
+        latitude: 35.7148,
+        longitude: 139.7967,
+      },
       image: '/images/asakusa.jpg',
       rating: 4.6,
       category: ['歴史', '文化'],
@@ -170,11 +199,16 @@ export const tokyoTravelPlan: TravelPlanType = {
     {
       id: '9',
       name: '東京タワー',
-      lat: 35.6586,
-      lng: 139.7454,
+      latitude: 35.6586,
+      longitude: 139.7454,
       stay: { start: '11:00', end: '12:30' },
       transport: { name: '電車', time: '15分' },
-      nearestStation: { name: '赤羽橋駅', walkingTime: '7分' },
+      nearestStation: {
+        name: '赤羽橋駅',
+        walkingTime: 7,
+        latitude: 35.6586,
+        longitude: 139.7454,
+      },
       image: '/images/tokyo-tower.jpg',
       rating: 4.5,
       category: ['観光', '都市'],
@@ -184,11 +218,16 @@ export const tokyoTravelPlan: TravelPlanType = {
     {
       id: '10',
       name: '秋葉原',
-      lat: 35.6998,
-      lng: 139.7745,
+      latitude: 35.6998,
+      longitude: 139.7745,
       stay: { start: '13:00', end: '14:30' },
       transport: { name: '電車', time: '10分' },
-      nearestStation: { name: '秋葉原駅', walkingTime: '2分' },
+      nearestStation: {
+        name: '秋葉原駅',
+        walkingTime: 2,
+        latitude: 35.6998,
+        longitude: 139.7745,
+      },
       image: '/images/akihabara.jpg',
       rating: 4.7,
       category: ['ショッピング', '文化'],
@@ -215,11 +254,16 @@ export const sapporoTravelPlan: TravelPlanType = {
     {
       id: '11',
       name: '大通公園',
-      lat: 43.0623,
-      lng: 141.3544,
+      latitude: 43.0623,
+      longitude: 141.3544,
       stay: { start: '09:00', end: '10:30' },
       transport: { name: '徒歩', time: '5分' },
-      nearestStation: { name: '大通駅', walkingTime: '3分' },
+      nearestStation: {
+        name: '大通駅',
+        walkingTime: 3,
+        latitude: 43.0623,
+        longitude: 141.3544,
+      },
       image: '/images/odori-park.jpg',
       rating: 4.6,
       category: ['自然', '観光'],
@@ -229,11 +273,16 @@ export const sapporoTravelPlan: TravelPlanType = {
     {
       id: '12',
       name: '札幌時計台',
-      lat: 43.0687,
-      lng: 141.3509,
+      latitude: 43.0687,
+      longitude: 141.3509,
       stay: { start: '11:00', end: '12:00' },
       transport: { name: '徒歩', time: '10分' },
-      nearestStation: { name: '時計台前駅', walkingTime: '5分' },
+      nearestStation: {
+        name: '時計台前駅',
+        walkingTime: 5,
+        latitude: 43.0687,
+        longitude: 141.3509,
+      },
       image: '/images/sapporo-clock-tower.jpg',
       rating: 4.5,
       category: ['歴史', '文化'],
@@ -243,11 +292,16 @@ export const sapporoTravelPlan: TravelPlanType = {
     {
       id: '13',
       name: 'すすきの',
-      lat: 43.0615,
-      lng: 141.3544,
+      latitude: 43.0615,
+      longitude: 141.3544,
       stay: { start: '13:00', end: '15:00' },
       transport: { name: '徒歩', time: '5分' },
-      nearestStation: { name: 'すすきの駅', walkingTime: '1分' },
+      nearestStation: {
+        name: 'すすきの駅',
+        walkingTime: 1,
+        latitude: 43.0615,
+        longitude: 141.3544,
+      },
       image: '/images/susukino.jpg',
       rating: 4.7,
       category: ['ショッピング', 'ナイトライフ'],
@@ -286,3 +340,56 @@ export const transportationMethods = [
   { id: 6, name: '飛行機' },
   { id: 7, name: '船' },
 ];
+
+export const dummyData = {
+  title: '夏の旅行計画',
+  start_date: new Date('2025-07-15T00:00:00.000Z'),
+  end_date: new Date('2025-07-20T00:00:00.000Z'),
+  tripInfo: [
+    {
+      date: new Date('2025-07-15T00:00:00.000Z'),
+      genre_id: 1,
+      transportation_method: [1, 2], // 空配列ではなく、最低1つ入れる
+      memo: '移動時間が長いので休憩をしっかり取る。',
+    },
+  ],
+  plans: [
+    {
+      date: new Date('2025-07-16T00:00:00.000Z'),
+      departure: {
+        name: '東京駅',
+        latitude: 35.6812,
+        longitude: 139.7671,
+      },
+      destination: {
+        name: '大阪駅',
+        latitude: 34.7025,
+        longitude: 135.4959,
+      },
+      spots: [
+        {
+          id: 1, // Prismaの自動採番ではないなら適切なIDをセット
+          name: '大阪城',
+          latitude: 34.6873,
+          longitude: 135.5259,
+          stay: {
+            start: '09:00', // 文字列の形式に修正
+            end: '10:30',
+          },
+          memo: '歴史的な場所で写真を撮る。',
+          image: 'https://example.com/image.jpg', // 画像URLの追加
+          rating: 4.5,
+          category: ['歴史', '観光'], // 適当なカテゴリ
+          catchphrase: '大阪の象徴、大阪城！',
+          description: '豊臣秀吉が築城した日本有数の城。',
+          nearestStation: {
+            name: '大阪城公園駅',
+            walkingTime: 5,
+            latitude: 34.6883,
+            longitude: 135.5269,
+          },
+        },
+      ],
+    },
+  ],
+};
