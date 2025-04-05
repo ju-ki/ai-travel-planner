@@ -24,6 +24,7 @@ export default function TripsPage() {
         {trips?.map((trip) => (
           <TripCard
             key={trip.id}
+            id={trip.id}
             title={trip.title}
             start_date={trip.startDate}
             end_date={trip.endDate}
