@@ -1,6 +1,12 @@
-import { createRoute } from '@hono/zod-openapi';
+import { createRoute, z } from '@hono/zod-openapi';
 
 import { TripSchema } from '../models/trip';
+
+export const requestParams = z
+  .object({
+    id: z.string().min(1).regex(/^\d+$/).transform(Number),
+  })
+  .openapi('RequestParams');
 
 export const getTripsRoute = createRoute({
   method: 'get',
@@ -15,6 +21,29 @@ export const getTripsRoute = createRoute({
           schema: TripSchema.array(),
         },
       },
+    },
+  },
+});
+
+export const getTripDetailRoute = createRoute({
+  method: 'get',
+  path: '/{id}',
+  tags: ['Trip'],
+  summary: '特定の旅行計画詳細を取得',
+  request: {
+    params: requestParams,
+  },
+  responses: {
+    200: {
+      description: '特定の旅行計画詳細',
+      content: {
+        'application/json': {
+          schema: TripSchema,
+        },
+      },
+    },
+    404: {
+      description: '旅行計画が取得できない',
     },
   },
 });

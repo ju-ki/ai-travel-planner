@@ -7,7 +7,7 @@ import { TripSchema } from '../models/trip';
 const prisma = new PrismaClient();
 
 export const getTripHandler = {
-  // 全てのトリップを取得
+  // 全ての旅行計画を取得
   getTrips: async (c: Context) => {
     try {
       const auth = getAuth(c);
@@ -44,7 +44,45 @@ export const getTripHandler = {
     }
   },
 
-  // 新しいトリップを登録
+  // 特定の旅行計画を取得
+
+  getTripDetail: async (c: Context) => {
+    const auth = getAuth(c);
+    if (!auth?.userId) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const tripId = parseInt(c.req.param('id'));
+
+    const targetTrip = await prisma.trip.findFirst({
+      where: {
+        id: tripId,
+        userId: auth.userId,
+      },
+      include: {
+        tripInfo: true,
+        plans: {
+          include: {
+            departure: true,
+            destination: true,
+            spots: {
+              include: {
+                nearestStation: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!targetTrip) {
+      return c.json({ error: 'No trip found' }, 404);
+    }
+
+    return c.json(targetTrip, 200);
+  },
+
+  // 新しい旅行計画を登録
   createTrip: async (c: Context) => {
     try {
       const auth = getAuth(c);

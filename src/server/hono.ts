@@ -4,7 +4,7 @@ import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
 
 import { getHelloRoutes } from './routes/hello';
 import { getHelloHandler } from './controllers/hello';
-import { getTripsRoute, createTripRoute } from './routes/trip';
+import { getTripsRoute, createTripRoute, getTripDetailRoute } from './routes/trip';
 import { getTripHandler } from './controllers/trip';
 
 const app = new OpenAPIHono().basePath('/api');
@@ -21,6 +21,7 @@ helloApp.openapi(getHelloRoutes, getHelloHandler);
 // トリップルートの登録
 tripApp.openapi(getTripsRoute, getTripHandler.getTrips);
 tripApp.openapi(createTripRoute, getTripHandler.createTrip);
+tripApp.openapi(getTripDetailRoute, getTripHandler.getTripDetail);
 
 app.route('/hello', helloApp);
 app.route('/trips', tripApp);
