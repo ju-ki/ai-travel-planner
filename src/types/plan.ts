@@ -38,7 +38,7 @@ export type Spot = {
   latitude: number;
   longitude: number;
   stay: StayDuration;
-  transport?: Transport;
+  transport: Transport;
   memo?: string;
   image?: string; // 画像URL (省略可能)
   rating: number; // 例: 4.7
@@ -53,4 +53,12 @@ export type TravelPlanType = {
   departure: Location;
   destination: Location;
   spots: Spot[];
+};
+
+export type PlaceTypeGroupKey = 'culture' | 'nature' | 'leisure' | 'gourmet' | 'shopping' | 'sports' | 'relaxation';
+
+export type SearchSpotByCategoryParams = {
+  lat: number; //基準となる緯度
+  lng: number; //基準となる経度
+  genreIds?: PlaceTypeGroupKey[]; //ジャンルリスト
 };

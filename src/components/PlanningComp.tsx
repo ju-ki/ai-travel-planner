@@ -70,7 +70,7 @@ const PlanningComp = ({ date }: { date: string }) => {
 
       {/* スポット選択 */}
       <div className="space-y-4">
-        <Label>スポット選択</Label>
+        <Label>観光地を検索</Label>
         <SpotSelection date={date} />
       </div>
       {/* タイムライン */}

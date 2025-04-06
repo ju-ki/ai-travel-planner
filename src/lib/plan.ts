@@ -4,7 +4,8 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { Location, Spot, TravelPlanType, TripInfo } from '@/types/plan';
+import { Location, SearchSpotByCategoryParams, Spot, TravelPlanType, TripInfo } from '@/types/plan';
+import { placeTypeGroups } from '@/data/dummyData';
 
 import { removeTimeFromDate } from './utils';
 
@@ -276,25 +277,44 @@ type Actions = {
 
 let map: google.maps.Map;
 
-export async function nearBySearch(position: Departure): Promise<PlaceInfo[]> {
+export async function searchByCategory(params: SearchSpotByCategoryParams): Promise<Spot[]> {
   const { Place, SearchNearbyRankPreference } = (await google.maps.importLibrary(
     'places',
   )) as google.maps.PlacesLibrary;
   const { AdvancedMarkerElement } = (await google.maps.importLibrary('marker')) as google.maps.MarkerLibrary;
 
   // Restrict within the map viewport.
-  const center = new google.maps.LatLng(position.lat, position.lng);
+  const center = new google.maps.LatLng(params.lat, params.lng);
 
-  const request = {
+  // 複数ジャンルを指定した場合にgoogle docsのtypeを使用
+  //https://developers.google.com/maps/documentation/places/web-service/place-types?hl=ja&_gl=1*tofb5y*_up*MQ..*_ga*MTQ4MDA4MDA0Mi4xNzQzODkxMDQ4*_ga_NRWSTWS78N*MTc0Mzg5MTA0Ny4xLjEuMTc0Mzg5MTMxNy4wLjAuMA..
+  const searchCategoryList: string[] = [];
+  params.genreIds?.forEach((genreId) => {
+    searchCategoryList.push(...placeTypeGroups[genreId]);
+  });
+
+  const request: google.maps.places.SearchNearbyRequest = {
     // required parameters
-    fields: ['displayName', 'location', 'businessStatus', 'googleMapsURI', 'photos'],
+    fields: [
+      'displayName',
+      'location',
+      'businessStatus',
+      'googleMapsURI',
+      'photos',
+      'rating',
+      'types',
+      'primaryType',
+      'primaryTypeDisplayName',
+      'attributions',
+      'regularOpeningHours',
+    ],
     locationRestriction: {
       center: center,
-      radius: 50000,
+      radius: 5000, //TODO:ある程度動的にする?
     },
     // optional parameters
-    includedPrimaryTypes: ['beach'],
-    maxResultCount: 5,
+    includedTypes: searchCategoryList,
+    maxResultCount: 10,
     rankPreference: SearchNearbyRankPreference.POPULARITY,
     language: 'ja',
     region: 'JP',
@@ -305,27 +325,30 @@ export async function nearBySearch(position: Departure): Promise<PlaceInfo[]> {
   if (places.length) {
     const { LatLngBounds } = (await google.maps.importLibrary('core')) as google.maps.CoreLibrary;
     const bounds = new LatLngBounds();
-    const results: PlaceInfo[] = [];
-    // Loop through and get all the results.
+    console.log(places);
+
+    const results: Spot[] = [];
     places.forEach((place) => {
-      const markerView = new AdvancedMarkerElement({
-        map,
-        position: place.location,
-        title: place.displayName,
-      });
+      //TODO: 検索結果をマップ上に表示する
+      // const markerView = new AdvancedMarkerElement({
+      //   map,
+      //   position: place.location,
+      //   title: place.displayName,
+      // });
       results.push({
         id: place.id,
         name: place.displayName || '',
-        url: place.googleMapsURI || '',
-        location: {
-          lat: place.location?.lat() ?? 0,
-          lng: place.location?.lng() ?? 0,
-        },
-        photos: place.photos?.length ? place.photos.map((photo) => ({ flagContentURI: photo.getURI() })) : [],
+        image: place.photos?.length
+          ? place.photos.map((photo) => ({ flagContentURI: photo.getURI() }))[0].flagContentURI
+          : '',
+        rating: place.rating || 0,
+        latitude: place.location?.lat() ?? 0,
+        longitude: place.location?.lng() ?? 0,
+        stay: { start: '09:00', end: '10:00' }, //TODO:仮置き
+        category: place.types || [], //TODO: 日本語化
+        transport: { name: '徒歩', time: '30分' }, //TODO:仮置き,
       });
     });
-
-    console.log(results);
 
     return results;
   } else {

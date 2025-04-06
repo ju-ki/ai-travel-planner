@@ -522,3 +522,54 @@ export const dummyData = {
     },
   ],
 };
+
+export type PlaceTypeGroupKey = 'culture' | 'nature' | 'leisure' | 'gourmet' | 'shopping' | 'sports' | 'relaxation';
+
+export const placeTypeGroups: Record<PlaceTypeGroupKey, string[]> = {
+  culture: [
+    'museum',
+    'art_gallery',
+    'church',
+    'hindu_temple',
+    'mosque',
+    'synagogue',
+    'cemetery',
+    'city_hall',
+    'library',
+    'local_government_office',
+    'courthouse',
+    'embassy',
+    'university',
+    'school',
+    'historical_landmark',
+    'tourist_attraction',
+  ],
+  nature: ['park', 'campground', 'rv_park', 'zoo', 'aquarium', 'beach'],
+  leisure: [
+    'amusement_park',
+    'movie_theater',
+    'bowling_alley',
+    'casino',
+    'night_club',
+    'spa',
+    'art_studio',
+    'performing_arts_theater',
+    'stadium',
+    'tourist_attraction', // also culture
+  ],
+  gourmet: ['restaurant', 'cafe', 'bar', 'bakery', 'meal_takeaway', 'meal_delivery'],
+  shopping: [
+    'shopping_mall',
+    'department_store',
+    'clothing_store',
+    'convenience_store',
+    'book_store',
+    'furniture_store',
+    'electronics_store',
+    'jewelry_store',
+    'supermarket',
+    'store',
+  ],
+  sports: ['gym', 'stadium', 'golf_course', 'bowling_alley', 'bicycle_store', 'sports_complex'],
+  relaxation: ['spa', 'beauty_salon', 'hair_care', 'physiotherapist', 'lodging'],
+};
