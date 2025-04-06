@@ -62,3 +62,11 @@ export type SearchSpotByCategoryParams = {
   lng: number; //基準となる経度
   genreIds?: PlaceTypeGroupKey[]; //ジャンルリスト
 };
+
+export type Notification = {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: Date;
+  isRead: boolean;
+};

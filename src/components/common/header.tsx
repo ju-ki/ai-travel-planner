@@ -6,6 +6,7 @@ import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
+import Notification from '../Notification';
 const Header = () => {
   return (
     <header className="flex h-16 w-full items-center justify-between px-4 md:px-6 border-b border-gray-200 dark:border-gray-800">
@@ -24,6 +25,7 @@ const Header = () => {
           <Link href="/plan/list" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
             プラン一覧
           </Link>
+          <Notification />
           <SignOutButton>
             <Button>ログアウト</Button>
           </SignOutButton>

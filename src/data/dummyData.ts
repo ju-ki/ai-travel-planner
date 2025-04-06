@@ -1,5 +1,5 @@
 import { FormData } from '@/lib/plan';
-import { TravelPlanType } from '@/types/plan';
+import { Notification, TravelPlanType } from '@/types/plan';
 
 export const initialActivities: TravelPlanType = {
   date: new Date('2025-3-10'),
@@ -573,3 +573,55 @@ export const placeTypeGroups: Record<PlaceTypeGroupKey, string[]> = {
   sports: ['gym', 'stadium', 'golf_course', 'bowling_alley', 'bicycle_store', 'sports_complex'],
   relaxation: ['spa', 'beauty_salon', 'hair_care', 'physiotherapist', 'lodging'],
 };
+
+export const notifications: Notification[] = [
+  {
+    id: '1',
+    title: '新しい旅行プランが作成されました',
+    description: '「夏の京都旅行」が正常に作成されました。プランの詳細を確認してください。',
+    createdAt: new Date('2024-03-30T10:00:00'),
+    isRead: false,
+  },
+  {
+    id: '2',
+    title: 'プランの更新があります',
+    description: '「大阪観光プラン」の内容が更新されました。変更点を確認してください。',
+    createdAt: new Date('2024-03-29T15:30:00'),
+    isRead: true,
+  },
+  {
+    id: '3',
+    title: '新着スポット情報',
+    description: 'あなたの旅行プランに関連する新しいスポットが追加されました。チェックしてみましょう。',
+    createdAt: new Date('2024-03-29T09:15:00'),
+    isRead: false,
+  },
+  {
+    id: '4',
+    title: '新着スポット情報',
+    description: 'あなたの旅行プランに関連する新しいスポットが追加されました。チェックしてみましょう。',
+    createdAt: new Date('2024-03-29T09:15:00'),
+    isRead: false,
+  },
+  {
+    id: '5',
+    title: '新着スポット情報',
+    description: 'あなたの旅行プランに関連する新しいスポットが追加されました。チェックしてみましょう。',
+    createdAt: new Date('2024-03-29T09:15:00'),
+    isRead: false,
+  },
+  {
+    id: '6',
+    title: '新着スポット情報',
+    description: 'あなたの旅行プランに関連する新しいスポットが追加されました。チェックしてみましょう。',
+    createdAt: new Date('2024-03-29T09:15:00'),
+    isRead: false,
+  },
+  {
+    id: '7',
+    title: '新着スポット情報',
+    description: 'あなたの旅行プランに関連する新しいスポットが追加されました。チェックしてみましょう。',
+    createdAt: new Date('2024-03-29T09:15:00'),
+    isRead: false,
+  },
+];
