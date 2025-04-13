@@ -1,11 +1,12 @@
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
+import { clerkMiddleware } from '@hono/clerk-auth';
 
-import { getHelloRoutes } from './routes/hello';
-import { getHelloHandler } from './controllers/hello';
 import { getTripsRoute, createTripRoute, getTripDetailRoute } from './routes/trip';
 import { getTripHandler } from './controllers/trip';
+import { serve } from 'bun';
+import { getHelloRoutes } from './routes/hello';
+import { getHelloHandler } from './controllers/hello';
 
 const app = new OpenAPIHono().basePath('/api');
 
@@ -15,7 +16,6 @@ const tripApp = new OpenAPIHono();
 
 tripApp.use('*', clerkMiddleware());
 
-// Helloルートの登録
 helloApp.openapi(getHelloRoutes, getHelloHandler);
 
 // トリップルートの登録
@@ -33,5 +33,15 @@ app
     info: { title: '旅行計画アプリケーションAPI', version: '1.0.0' },
   })
   .get('/doc', swaggerUI({ url: '/api/specification' }));
+
+app.onError((err, c) => {
+  console.error(`${err}`);
+  return c.text('Custom Error Message', 500);
+});
+
+serve({
+  port: 8787,
+  fetch: app.fetch,
+});
 
 export default app;

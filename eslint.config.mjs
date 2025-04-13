@@ -8,7 +8,7 @@ import * as importPlugin from 'eslint-plugin-import';
 
 const config = [
   {
-    files: ['src/**/*.{js,ts,tsx,jsx}'],
+    files: ['backend/src/**/*.{js,ts,tsx,jsx}', 'frontend/src/**/*.{js,ts,tsx,jsx}'],
   },
   {
     ignores: [
