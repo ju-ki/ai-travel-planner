@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Spot } from '@/app/types/travel';
+import { Spot } from '@/types/plan';
 
 interface SpotCardProps {
   spot: Spot;
@@ -17,7 +17,7 @@ export function SpotCard({ spot, isLast }: SpotCardProps) {
     <div className="relative">
       <Card className="mb-4">
         <CardHeader className="relative p-0 h-48">
-          <Image src={spot.image} alt={spot.name} fill className="object-cover rounded-t-lg" />
+          <Image src={spot.image || '/scene.webp'} alt={spot.name} fill className="object-cover rounded-t-lg" />
           <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center gap-1">
             <Star className="w-4 h-4 text-yellow-500" />
             <span className="text-sm font-medium">{spot.rating}</span>
@@ -55,9 +55,11 @@ export function SpotCard({ spot, isLast }: SpotCardProps) {
 
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="w-4 h-4" />
-              <span>
-                {spot.nearestStation.name} (徒歩{spot.nearestStation.walkingTime}分)
-              </span>
+              {spot.nearestStation && (
+                <span>
+                  {spot.nearestStation.name} (徒歩{spot.nearestStation.walkingTime}分)
+                </span>
+              )}
             </div>
           </div>
 

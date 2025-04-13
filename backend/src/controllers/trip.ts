@@ -1,8 +1,8 @@
 import { Context } from 'hono';
 import { getAuth } from '@hono/clerk-auth';
-import { PrismaClient } from '@prisma/client';
 
 import { TripSchema } from '../models/trip';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

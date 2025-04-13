@@ -22,6 +22,9 @@ export const getTripsRoute = createRoute({
         },
       },
     },
+    500: {
+      description: '旅行計画取得時のエラー',
+    },
   },
 });
 
@@ -44,6 +47,9 @@ export const getTripDetailRoute = createRoute({
     },
     404: {
       description: '旅行計画が取得できない',
+    },
+    500: {
+      description: '旅行計画取得時のエラー',
     },
   },
 });
@@ -70,6 +76,9 @@ export const createTripRoute = createRoute({
           schema: TripSchema,
         },
       },
+    },
+    500: {
+      description: '旅行計画取得時のエラー',
     },
   },
 });

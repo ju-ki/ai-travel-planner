@@ -1,0 +1,20 @@
+FROM oven/bun:1.1.4
+
+# ルートワークディレクトリ
+WORKDIR /app
+
+
+# backend アプリをコピー
+COPY backend ./backend
+
+# 作業ディレクトリを backend に移動
+WORKDIR /app/backend
+
+# 依存インストール
+RUN bun install
+
+# Prisma Client を生成（bun を使って実行）
+RUN bun prisma generate
+
+# エントリポイント（bun run dev）を最終的に呼び出す
+CMD ["bun", "run", "dev"]

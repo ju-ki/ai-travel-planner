@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { dummyData } from '@/data/dummyData';
 import { DayPlan } from '@/components/DayPlan';
 import { Button } from '@/components/ui/button';
+import { FormData } from '@/lib/plan';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -52,7 +53,7 @@ const PageDetail = () => {
                   {format(trip.startDate, 'yyyy年MM月dd日')} - {format(trip.endDate, 'yyyy年MM月dd日')}
                 </span>
               </div>
-              {trip.tripInfo.map((info, index) => (
+              {(trip as FormData).tripInfo.map((info, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>{info.memo}</span>
@@ -64,7 +65,7 @@ const PageDetail = () => {
 
         <Tabs defaultValue="day-1" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
-            {trip.plans.map((_, index) => (
+            {(trip as FormData).plans.map((_, index) => (
               <TabsTrigger key={`day-${index + 1}`} value={`day-${index + 1}`} className="text-lg">
                 Day {index + 1}
               </TabsTrigger>

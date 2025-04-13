@@ -4,11 +4,12 @@ import useSWR from 'swr';
 
 import { TripCard } from '@/components/TripCard';
 import { TripSearchForm } from '@/components/TripSearchForm';
+import { FormData } from '@/lib/plan';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function TripsPage() {
-  const { data: trips, error, isLoading } = useSWR('/api/trips', fetcher);
+  const { data: trips, error, isLoading } = useSWR('http://localhost:8787/api/trips', fetcher);
 
   if (error) return <div>エラーが発生しました</div>;
   if (isLoading) return <div>読み込み中...</div>;
@@ -21,13 +22,13 @@ export default function TripsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trips?.map((trip) => (
+        {(trips as FormData[]).map((trip, idx) => (
           <TripCard
-            key={trip.id}
-            id={trip.id}
+            key={idx}
+            id={idx}
             title={trip.title}
-            start_date={trip.startDate}
-            end_date={trip.endDate}
+            start_date={trip.start_date}
+            end_date={trip.end_date}
             imageUrl={trip.plans?.[0]?.spots?.[0]?.image}
           />
         ))}
