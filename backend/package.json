@@ -2,7 +2,7 @@
   "name": "backend",
   "private": true,
   "scripts": {
-    "dev": "bun run src/index.ts"
+    "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
     "@clerk/backend": "^1.25.5",

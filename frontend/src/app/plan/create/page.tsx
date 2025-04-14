@@ -15,12 +15,23 @@ import { useStoreForPlanning } from '@/lib/plan';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanningComp from '@/components/PlanningComp';
 import { dummyData } from '@/data/dummyData';
+import { useAuth } from '@clerk/nextjs';
+
 const TravelPlanCreate = () => {
   const fields = useStoreForPlanning();
 
+  const { getToken } = useAuth();
+
   const handleCreatePlan = async () => {
     console.log('旅行計画が作成されました');
-    fetch('/api/trips/create', { method: 'POST', body: JSON.stringify(dummyData) })
+    const token = await getToken();
+    fetch('http://localhost:8787/api/trips/create', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'POST',
+      body: JSON.stringify(dummyData),
+    })
       .then((res) => res.json())
       .then((data) => console.log(data))
       .catch((err) => console.error(err));

@@ -2,7 +2,7 @@ import { Context } from 'hono';
 import { getAuth } from '@hono/clerk-auth';
 
 import { TripSchema } from '../models/trip';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated/prisma';
 
 const prisma = new PrismaClient();
 
@@ -11,12 +11,15 @@ export const getTripHandler = {
   getTrips: async (c: Context) => {
     try {
       const auth = getAuth(c);
+
       if (!auth?.userId) {
-        return c.json({ error: 'Unauthorized' }, 401);
+        return c.json({ error: 'Unauthorized error' }, 401);
       }
 
+      const userId = auth.userId;
+
       const tripInfo = await prisma.trip.findMany({
-        where: { userId: auth.userId },
+        where: { userId: userId },
         include: {
           tripInfo: true,
           plans: {
@@ -34,12 +37,13 @@ export const getTripHandler = {
       });
 
       if (!tripInfo.length) {
-        return c.json({ message: 'No trips found' }, 200);
+        return c.json([], 200);
       }
 
       return c.json(tripInfo, 200);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error(errorMessage);
       return c.json({ error: 'Internal Server Error', details: errorMessage }, 500);
     }
   },
