@@ -1,6 +1,7 @@
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { clerkMiddleware } from '@hono/clerk-auth';
+import { cors } from 'hono/cors';
 
 import { getTripsRoute, createTripRoute, getTripDetailRoute } from './routes/trip';
 import { getTripHandler } from './controllers/trip';
@@ -10,11 +11,28 @@ import { getHelloHandler } from './controllers/hello';
 
 const app = new OpenAPIHono().basePath('/api');
 
+app.use(
+  '*',
+  cors({
+    origin: 'http://localhost:3000',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Clerk-Auth'],
+    credentials: true,
+    maxAge: 600,
+  }),
+);
+
 //ルートの登録
 const helloApp = new OpenAPIHono();
 const tripApp = new OpenAPIHono();
 
-tripApp.use('*', clerkMiddleware());
+tripApp.use(
+  '*',
+  clerkMiddleware({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
+  }),
+);
 
 helloApp.openapi(getHelloRoutes, getHelloHandler);
 

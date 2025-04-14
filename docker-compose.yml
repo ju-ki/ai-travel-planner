@@ -30,8 +30,10 @@ services:
       - dev-db
     environment:
       DATABASE_URL: 'postgresql://travel_user:travel_admin@dev-db:5432/ai_travel'
+      WATCHPACK_POLLING: true
     volumes:
-      - .:/app
+      - ./backend:/app/backend
+      - /app/backend/node_modules
       - ./prisma:/app/prisma
     working_dir: /app/backend
     tty: true
