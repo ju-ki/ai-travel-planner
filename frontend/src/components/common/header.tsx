@@ -1,4 +1,5 @@
-import { SignInButton, SignOutButton, SignedIn, SignedOut } from '@clerk/nextjs';
+'use client';
+import { SignInButton, SignOutButton, SignedIn, SignedOut, useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { MenuIcon } from 'lucide-react';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
@@ -7,7 +8,24 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 import Notification from '../Notification';
+import useSWR from 'swr';
+
 const Header = () => {
+  const { getToken } = useAuth();
+
+  const fetcher = async (url: string) => {
+    const token = await getToken();
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'GET',
+    });
+    return response.json();
+  };
+
+  useSWR('http://localhost:8787/api/auth', fetcher);
   return (
     <header className="flex h-16 w-full items-center justify-between px-4 md:px-6 border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center space-x-3">

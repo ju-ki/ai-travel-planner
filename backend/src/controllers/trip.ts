@@ -171,6 +171,7 @@ export const getTripHandler = {
       return c.json(newTrip, 201);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.log(errorMessage);
       return c.json({ error: 'Internal Server Error', details: errorMessage }, 500);
     }
   },

@@ -8,6 +8,8 @@ import { getTripHandler } from './controllers/trip';
 import { serve } from 'bun';
 import { getHelloRoutes } from './routes/hello';
 import { getHelloHandler } from './controllers/hello';
+import { findExistingUserRoute } from './routes/auth';
+import { getAuthHandler } from './controllers/auth';
 
 const app = new OpenAPIHono().basePath('/api');
 
@@ -25,8 +27,17 @@ app.use(
 //ルートの登録
 const helloApp = new OpenAPIHono();
 const tripApp = new OpenAPIHono();
+const authApp = new OpenAPIHono();
 
 tripApp.use(
+  '*',
+  clerkMiddleware({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY,
+  }),
+);
+
+authApp.use(
   '*',
   clerkMiddleware({
     publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
@@ -41,8 +52,11 @@ tripApp.openapi(getTripsRoute, getTripHandler.getTrips);
 tripApp.openapi(createTripRoute, getTripHandler.createTrip);
 tripApp.openapi(getTripDetailRoute, getTripHandler.getTripDetail);
 
+authApp.openapi(findExistingUserRoute, getAuthHandler);
+
 app.route('/hello', helloApp);
 app.route('/trips', tripApp);
+app.route('/auth', authApp);
 
 // APIドキュメントの登録
 app
