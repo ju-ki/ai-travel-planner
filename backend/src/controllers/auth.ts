@@ -9,7 +9,6 @@ const prisma = new PrismaClient();
 export const getAuthHandler: RouteHandler<typeof findExistingUserRoute> = async (c: Context) => {
   try {
     const auth = getAuth(c);
-    console.log(auth);
 
     if (!auth?.userId) {
       return c.json({ error: 'Unauthorized' }, 401);
