@@ -8,11 +8,12 @@ import { useStoreForPlanning } from '@/lib/plan';
 
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
+import TravelMap from './TravelMap';
 
 const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
   const fields = useStoreForPlanning();
   if (!travelPlan) {
-    return;
+    return null;
   }
 
   const targetSimulationStatus = fields.simulationStatus
@@ -61,6 +62,12 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
 
   return (
     <div className="p-6 space-y-10 border-l-4 border-gray-300">
+      {/* マップを追加 */}
+      <div className="mb-10 bg-white p-4 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4">旅行ルート</h2>
+        <TravelMap travelPlan={travelPlan} />
+      </div>
+
       {/* 出発地 */}
       <div className="mb-10 border-b border-gray-300 pb-6">
         <div className="flex items-center space-x-2">
