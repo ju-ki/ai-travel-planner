@@ -12,8 +12,36 @@ on:
       - master
 
 jobs:
-  lint-and-format:
+  frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Prettier check
+        run: npm run format:check
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -27,14 +55,17 @@ jobs:
         run: bun install
 
       - name: Run ESLint
-        run: bun eslint .
+        run: bun run lint
 
       - name: Run Prettier check
-        run: bun prettier --check "src/**/*.{js,ts,jsx,tsx,json,md}"
+        run: bun run format:check
+
+      - name: Build
+        run: bun run build
 
   create-pull-request:
     if: github.event_name == 'push'
-    needs: [lint-and-format]
+    needs: [frontend, backend]
     runs-on: ubuntu-latest
     steps:
       - name: Install GitHub CLI
@@ -71,9 +102,9 @@ jobs:
 
               ### レビュー依頼
               @coderabbitai review")
-                          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
-                          echo "PR created at $PR_URL"
-                        else
-                          echo "pr_url=" >> $GITHUB_OUTPUT
-                          echo "No changes to create a PR for."
-                        fi
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "PR created at $PR_URL"
+          else
+            echo "pr_url=" >> $GITHUB_OUTPUT
+            echo "No changes to create a PR for."
+          fi

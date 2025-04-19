@@ -1,7 +1,8 @@
 import { RouteHandler } from '@hono/zod-openapi';
-import { findExistingUserRoute } from '../routes/auth';
 import { getAuth } from '@hono/clerk-auth';
 import { Context } from 'hono';
+
+import { findExistingUserRoute } from '../routes/auth';
 import { PrismaClient } from '../generated/prisma';
 
 const prisma = new PrismaClient();

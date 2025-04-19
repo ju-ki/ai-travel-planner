@@ -3,12 +3,12 @@ import { SignInButton, SignOutButton, SignedIn, SignedOut, useAuth, useUser } fr
 import Link from 'next/link';
 import { MenuIcon } from 'lucide-react';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import useSWR from 'swr';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 import Notification from '../Notification';
-import useSWR from 'swr';
 
 const Header = () => {
   const { getToken } = useAuth();

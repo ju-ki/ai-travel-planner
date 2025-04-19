@@ -1,11 +1,11 @@
 'use client';
 
 import useSWR from 'swr';
+import { useAuth } from '@clerk/nextjs';
 
 import { TripCard } from '@/components/TripCard';
 import { TripSearchForm } from '@/components/TripSearchForm';
 import { FormData } from '@/lib/plan';
-import { useAuth } from '@clerk/nextjs';
 
 export default function TripsPage() {
   const { getToken } = useAuth();
