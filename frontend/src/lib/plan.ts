@@ -325,7 +325,6 @@ export async function searchByCategory(params: SearchSpotByCategoryParams): Prom
   if (places.length) {
     const { LatLngBounds } = (await google.maps.importLibrary('core')) as google.maps.CoreLibrary;
     const bounds = new LatLngBounds();
-    console.log(places);
 
     const results: Spot[] = [];
     places.forEach((place) => {
@@ -356,3 +355,44 @@ export async function searchByCategory(params: SearchSpotByCategoryParams): Prom
     return [];
   }
 }
+
+export type RouteResult = {
+  path: google.maps.LatLngLiteral[];
+  distance: string;
+  duration: string;
+};
+
+export const getRoute = async (
+  origin: { lat: number; lng: number },
+  destination: { lat: number; lng: number },
+  travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
+): Promise<RouteResult> => {
+  try {
+    const directionsService = new google.maps.DirectionsService();
+    const result = await directionsService.route({
+      origin,
+      destination,
+      travelMode,
+    });
+
+    if (result.routes[0]) {
+      return {
+        path: result.routes[0].overview_path.map((point) => ({
+          lat: point.lat(),
+          lng: point.lng(),
+        })),
+        distance: result.routes[0].legs[0].distance?.text || '',
+        duration: result.routes[0].legs[0].duration?.text || '',
+      };
+    }
+  } catch (error) {
+    console.error('Failed to get route:', error);
+  }
+
+  // フォールバック: 直線距離
+  return {
+    path: [origin, destination],
+    distance: '',
+    duration: '',
+  };
+};
