@@ -3,8 +3,9 @@ FROM oven/bun:1.1.4
 # ルートワークディレクトリ
 WORKDIR /app
 
-
-# backend アプリをコピー
+# 必要なファイルをコピー
+COPY backend/package.json backend/bun.lockb ./
+COPY prisma ./prisma
 COPY backend ./backend
 
 # 作業ディレクトリを backend に移動
