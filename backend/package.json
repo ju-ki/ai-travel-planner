@@ -2,7 +2,12 @@
   "name": "backend",
   "private": true,
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "build": "tsc",
+    "lint": "eslint .",
+    "fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{js,ts}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts}\""
   },
   "dependencies": {
     "@clerk/backend": "^1.25.5",
@@ -15,5 +20,13 @@
     "bun": "^1.2.9",
     "hono": "^3.10.0",
     "prisma": "^6.6.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.30.1",
+    "@typescript-eslint/parser": "^8.30.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "3.5.3",
+    "typescript-eslint": "^8.30.1"
   }
 }

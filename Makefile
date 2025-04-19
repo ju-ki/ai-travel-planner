@@ -8,3 +8,7 @@ restart:
 	@make down
 	@make build
 	@make up
+action-frontend:
+	act -j "frontend" --container-architecture=linux/amd64
+action-backend:
+	act -j "backend" --container-architecture=linux/amd64

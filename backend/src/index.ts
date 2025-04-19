@@ -2,10 +2,10 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { clerkMiddleware } from '@hono/clerk-auth';
 import { cors } from 'hono/cors';
+import { serve } from 'bun';
 
 import { getTripsRoute, createTripRoute, getTripDetailRoute } from './routes/trip';
 import { getTripHandler } from './controllers/trip';
-import { serve } from 'bun';
 import { getHelloRoutes } from './routes/hello';
 import { getHelloHandler } from './controllers/hello';
 import { findExistingUserRoute } from './routes/auth';

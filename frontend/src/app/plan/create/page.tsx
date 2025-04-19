@@ -3,6 +3,7 @@ import { CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { LoadScript } from '@react-google-maps/api';
+import { useAuth } from '@clerk/nextjs';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,7 +16,6 @@ import { useStoreForPlanning } from '@/lib/plan';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanningComp from '@/components/PlanningComp';
 import { dummyData } from '@/data/dummyData';
-import { useAuth } from '@clerk/nextjs';
 
 const TravelPlanCreate = () => {
   const fields = useStoreForPlanning();
