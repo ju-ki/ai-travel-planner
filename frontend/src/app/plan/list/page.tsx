@@ -38,8 +38,8 @@ export default function TripsPage() {
             key={idx}
             id={idx}
             title={trip.title}
-            start_date={trip.startDate}
-            end_date={trip.endDate}
+            startDate={trip.startDate}
+            endDate={trip.endDate}
             imageUrl={trip.plans?.[0]?.spots?.[0]?.image}
           />
         ))}

@@ -18,13 +18,13 @@ const Transportation = ({ date }: { date: string }) => {
               <Checkbox
                 checked={(
                   fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]
-                    ?.transportation_method || []
+                    ?.transportationMethod || []
                 ).includes(method.id)}
                 className="h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-400"
                 onCheckedChange={(checked) => {
                   const targetList =
                     fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]
-                      ?.transportation_method || [];
+                      ?.transportationMethod || [];
                   const isIncluded = targetList.includes(method.id);
                   if (checked && !isIncluded) {
                     fields.setTripInfo(new Date(date), 'transportation_method', [...targetList, method.id]);
@@ -43,7 +43,7 @@ const Transportation = ({ date }: { date: string }) => {
         ))}
       </div>
       {fields.tripInfoErrors && (
-        <span className="text-red-500">{fields.tripInfoErrors[date]?.transportation_method}</span>
+        <span className="text-red-500">{fields.tripInfoErrors[date]?.transportationMethod}</span>
       )}
     </div>
   );

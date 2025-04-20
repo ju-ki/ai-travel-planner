@@ -5,13 +5,13 @@ export const TripSchema = z.object({
     .string()
     .min(1, { message: 'タイトルは必須です' })
     .max(50, { message: 'タイトルの上限を超えています。50文字以下で入力してください' }),
-  start_date: z.coerce.date({ message: '予定日の開始日を入力してください' }),
-  end_date: z.coerce.date({ message: '予定日の終了日を入力してください' }),
+  startDate: z.coerce.date({ message: '予定日の開始日を入力してください' }),
+  endDate: z.coerce.date({ message: '予定日の終了日を入力してください' }),
   tripInfo: z.array(
     z.object({
       date: z.coerce.date(),
-      genre_id: z.number(),
-      transportation_method: z.array(z.number()).refine((value) => value.some((item) => item), {
+      genreId: z.number(),
+      transportationMethod: z.array(z.number()).refine((value) => value.some((item) => item), {
         message: '移動手段は最低でも1つ以上選択してください',
       }),
       memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),

@@ -6,6 +6,7 @@ import useSWR from 'swr';
 import { Clock, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,11 +15,21 @@ import { DayPlan } from '@/components/DayPlan';
 import { Button } from '@/components/ui/button';
 import { FormData } from '@/lib/plan';
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 const PageDetail = () => {
+  const { getToken } = useAuth();
+  const fetcher = async (url: string) => {
+    const token = await getToken();
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'GET',
+    });
+    return response.json();
+  };
   const router = useParams();
-  const { data: trip, error, isLoading } = useSWR(`/api/trips/${router.id}`, fetcher);
+  const { data: trip, error, isLoading } = useSWR(`http://localhost:8787/api/trips/${router.id}`, fetcher);
 
   if (error) return <div className="container mx-auto py-8 text-center">エラーが発生しました</div>;
   if (isLoading || !trip) return <div className="container mx-auto py-8 text-center">読み込み中...</div>;

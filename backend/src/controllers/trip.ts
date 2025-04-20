@@ -109,14 +109,14 @@ export const getTripHandler = {
       const newTrip = await prisma.trip.create({
         data: {
           title: trip.title,
-          startDate: new Date(trip.start_date),
-          endDate: new Date(trip.end_date),
+          startDate: new Date(trip.startDate),
+          endDate: new Date(trip.endDate),
           userId: auth.userId,
           tripInfo: {
             create: trip.tripInfo.map((info) => ({
               date: new Date(info.date),
-              genreId: info.genre_id,
-              transportationMethods: info.transportation_method,
+              genreId: info.genreId,
+              transportationMethods: info.transportationMethod,
               memo: info.memo,
             })),
           },
