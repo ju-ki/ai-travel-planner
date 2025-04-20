@@ -4,6 +4,7 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { LoadScript } from '@react-google-maps/api';
 import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,14 +17,15 @@ import { useStoreForPlanning } from '@/lib/plan';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanningComp from '@/components/PlanningComp';
 import { dummyData } from '@/data/dummyData';
+import { useToast } from '@/hooks/use-toast';
 
 const TravelPlanCreate = () => {
   const fields = useStoreForPlanning();
-
+  const { toast } = useToast();
   const { getToken } = useAuth();
+  const router = useRouter();
 
   const handleCreatePlan = async () => {
-    console.log('旅行計画が作成されました');
     const token = await getToken();
     fetch('http://localhost:8787/api/trips/create', {
       headers: {
@@ -33,8 +35,13 @@ const TravelPlanCreate = () => {
       body: JSON.stringify(dummyData),
     })
       .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((err) => console.error(err));
+      .then((data) => {
+        toast({ title: '旅行計画が作成されました', description: '旅行計画の作成に成功しました。', variant: 'success' });
+        router.push(`/plan/${data.id}`);
+      })
+      .catch((err) =>
+        toast({ title: '旅行計画の作成に失敗しました', description: err.message, variant: 'destructive' }),
+      );
   };
 
   return (
