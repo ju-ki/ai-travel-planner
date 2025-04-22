@@ -82,17 +82,17 @@ const TravelPlanCreate = () => {
                       variant={'outline'}
                       className={cn(
                         'w-full justify-start text-left font-normal',
-                        !fields.start_date && 'text-muted-foreground',
+                        !fields.startDate && 'text-muted-foreground',
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {fields.start_date ? (
-                        fields.end_date ? (
+                      {fields.startDate ? (
+                        fields.endDate ? (
                           <>
-                            {format(fields.start_date, 'yyyy/MM/dd')} 〜 {format(fields.end_date, 'yyyy/MM/dd')}
+                            {format(fields.startDate, 'yyyy/MM/dd')} 〜 {format(fields.endDate, 'yyyy/MM/dd')}
                           </>
                         ) : (
-                          format(fields.start_date, 'yyyy/MM/dd')
+                          format(fields.startDate, 'yyyy/MM/dd')
                         )
                       ) : (
                         <span>日付範囲を選択</span>
@@ -103,10 +103,10 @@ const TravelPlanCreate = () => {
                     <Calendar
                       initialFocus
                       mode="range"
-                      defaultMonth={fields.start_date}
+                      defaultMonth={fields.startDate}
                       selected={{
-                        from: fields.start_date,
-                        to: fields.end_date,
+                        from: fields.startDate,
+                        to: fields.endDate,
                       }}
                       onSelect={(dateRange: DateRange | undefined) => {
                         fields.setRangeDate({
@@ -119,22 +119,22 @@ const TravelPlanCreate = () => {
                   </PopoverContent>
                 </Popover>
                 <div className="my-1">
-                  {fields.errors.start_date && (
-                    <span className="text-red-500">{fields.errors.start_date.toString()}</span>
+                  {fields.errors.startDate && (
+                    <span className="text-red-500">{fields.errors.startDate.toString()}</span>
                   )}
                 </div>
               </div>
 
               {/* 選択した日付分だけタブが生成されるようにする */}
-              <Tabs defaultValue={fields.start_date.toLocaleDateString('ja-JP')} defaultChecked={true}>
+              <Tabs defaultValue={fields.startDate.toLocaleDateString('ja-JP')} defaultChecked={true}>
                 <TabsList className="flex justify-start space-x-2">
-                  {getDatesBetween(fields.start_date, fields.end_date).map((date) => (
+                  {getDatesBetween(fields.startDate, fields.endDate).map((date) => (
                     <TabsTrigger key={date} value={date}>
                       {date}
                     </TabsTrigger>
                   ))}
                 </TabsList>
-                {getDatesBetween(fields.start_date, fields.end_date).map((date) => (
+                {getDatesBetween(fields.startDate, fields.endDate).map((date) => (
                   <TabsContent key={date} value={date}>
                     <PlanningComp date={date} />
                   </TabsContent>

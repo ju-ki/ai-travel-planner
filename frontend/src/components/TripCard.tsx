@@ -7,12 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 type TripCardProps = {
   id: string | number;
   title: string;
-  start_date: Date;
-  end_date: Date;
+  startDate: Date;
+  endDate: Date;
   imageUrl?: string;
 };
 
-export const TripCard = ({ id, title, start_date, end_date, imageUrl }: TripCardProps) => {
+export const TripCard = ({ id, title, startDate, endDate, imageUrl }: TripCardProps) => {
   return (
     <Link href={`/plan/${id}`}>
       <Card className="overflow-hidden">
@@ -22,9 +22,9 @@ export const TripCard = ({ id, title, start_date, end_date, imageUrl }: TripCard
         <CardContent className="p-4">
           <h3 className="text-lg font-bold mb-2 line-clamp-1">{title}</h3>
           <div className="flex text-sm text-gray-600">
-            <p>{format(start_date, 'yyyy/MM/dd')}</p>
+            <p>{format(startDate, 'yyyy/MM/dd')}</p>
             <p>〜</p>
-            <p>{format(end_date, 'yyyy/MM/dd')}</p>
+            <p>{format(endDate, 'yyyy/MM/dd')}</p>
           </div>
         </CardContent>
       </Card>

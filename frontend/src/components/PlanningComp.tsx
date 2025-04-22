@@ -25,7 +25,7 @@ const PlanningComp = ({ date }: { date: string }) => {
         <Select
           onValueChange={(value) => fields.setTripInfo(new Date(date), 'genre_id', value)}
           value={
-            fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]?.genre_id.toString() || ''
+            fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]?.genreId.toString() || ''
           }
         >
           <SelectTrigger>
@@ -40,7 +40,7 @@ const PlanningComp = ({ date }: { date: string }) => {
           </SelectContent>
         </Select>
 
-        {fields.tripInfoErrors && <span className="text-red-500">{fields.tripInfoErrors[date]?.genre_id}</span>}
+        {fields.tripInfoErrors && <span className="text-red-500">{fields.tripInfoErrors[date]?.genreId}</span>}
       </div>
       {/* メインとなる移動手段 */}
       <div className="space-y-4">

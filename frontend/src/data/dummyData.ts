@@ -343,13 +343,13 @@ export const transportationMethods = [
 
 export const dummyData = {
   title: '夏の旅行計画1泊2日',
-  start_date: new Date('2025-07-15T00:00:00.000Z'),
-  end_date: new Date('2025-07-16T00:00:00.000Z'),
+  startDate: new Date('2025-07-15T00:00:00.000Z'),
+  endDate: new Date('2025-07-16T00:00:00.000Z'),
   tripInfo: [
     {
       date: new Date('2025-07-15T00:00:00.000Z'),
-      genre_id: 1,
-      transportation_method: [1, 2], // 空配列ではなく、最低1つ入れる
+      genreId: 1,
+      transportationMethod: [1, 2], // 空配列ではなく、最低1つ入れる
       memo: '移動時間が長いので休憩をしっかり取る。',
     },
   ],

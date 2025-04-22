@@ -27,8 +27,8 @@ type NearestStation = {
 
 export type TripInfo = {
   date: Date;
-  genre_id: number;
-  transportation_method: number[];
+  genreId: number;
+  transportationMethod: number[];
   memo?: string;
 };
 

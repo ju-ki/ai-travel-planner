@@ -11,24 +11,24 @@ const PlanningButton = ({ date }: { date: string }) => {
     let isError = false;
     fields.resetErrors();
     //推した時点で予定日、目的地、出発地、交通手段、観光スポットが空の場合はエラーを出す
-    if (!fields.start_date || !fields.end_date) {
-      fields.setErrors({ start_date: 'プランの日付を入力してください' });
+    if (!fields.startDate || !fields.endDate) {
+      fields.setErrors({ startDate: 'プランの日付を入力してください' });
       isError = true;
     }
 
     const targetTripInfo = fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0];
     const targetPlans = fields.plans.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0];
 
-    if (!targetTripInfo || !targetTripInfo.transportation_method.length) {
+    if (!targetTripInfo || !targetTripInfo.transportationMethod.length) {
       fields.setTripInfoErrors(new Date(date), {
-        transportation_method: '計画設定の移動手段を一つ以上チェックしてください',
+        transportationMethod: '計画設定の移動手段を一つ以上チェックしてください',
       });
       isError = true;
     }
 
-    if (!targetTripInfo || !targetTripInfo.genre_id) {
+    if (!targetTripInfo || !targetTripInfo.genreId) {
       fields.setTripInfoErrors(new Date(date), {
-        genre_id: '計画設定のジャンルを選択してください',
+        genreId: '計画設定のジャンルを選択してください',
       });
       isError = true;
     }
