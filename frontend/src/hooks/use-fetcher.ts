@@ -39,5 +39,22 @@ export const useFetcher = () => {
     return response.json();
   };
 
-  return { getFetcher, postFetcher };
+  const deleteFetcher = async (url: string, { arg }: { arg: { id: number } }) => {
+    const token = await getToken();
+    const response = await fetch(`${url}/${arg.id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('エラーが発生しました');
+    }
+
+    return response.json();
+  };
+
+  return { getFetcher, postFetcher, deleteFetcher };
 };

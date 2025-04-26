@@ -54,6 +54,34 @@ export const getTripDetailRoute = createRoute({
   },
 });
 
+export const deleteTripRoute = createRoute({
+  method: 'delete',
+  path: '/{id}',
+  tags: ['Trip'],
+  summary: '旅行計画を削除',
+  request: {
+    params: requestParams,
+  },
+  responses: {
+    200: {
+      description: '旅行計画削除成功',
+      content: {
+        'application/json': {
+          schema: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    404: {
+      description: '旅行計画が取得できない',
+    },
+    500: {
+      description: '旅行計画削除時のエラー',
+    },
+  },
+});
+
 export const createTripRoute = createRoute({
   method: 'post',
   path: '/create',
