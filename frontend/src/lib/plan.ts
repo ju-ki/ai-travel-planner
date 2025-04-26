@@ -85,7 +85,7 @@ interface FormState {
   spotErrors: Partial<Record<string, Partial<Record<keyof Spot, string>>>>;
   setTripInfo: (
     date: Date,
-    name: 'date' | 'genre_id' | 'transportation_method' | 'memo',
+    name: 'date' | 'genreId' | 'transportationMethod' | 'memo',
     value: Date | number | number[] | string,
   ) => void;
   simulationStatus: { date: Date; status: number }[] | null;
@@ -155,6 +155,7 @@ export const useStoreForPlanning = create<FormState>()(
           const existingTripInfoIndex = state.tripInfo.findIndex(
             (info) => info.date.toDateString() === date.toDateString(),
           );
+
           if (existingTripInfoIndex >= 0) {
             state.tripInfo[existingTripInfoIndex] = {
               ...state.tripInfo[existingTripInfoIndex],
@@ -163,8 +164,8 @@ export const useStoreForPlanning = create<FormState>()(
           } else {
             state.tripInfo.push({
               date: removeTimeFromDate(date),
-              genreId: name === 'genre_id' ? Number(value) : 0,
-              transportationMethod: name === 'transportation_method' ? (value as number[]) : [],
+              genreId: name === 'genreId' ? Number(value) : 0,
+              transportationMethod: name === 'transportationMethod' ? (value as number[]) : [],
               memo: name === 'memo' ? (value as string) : '',
             });
           }
@@ -268,11 +269,6 @@ export type PlaceInfo = {
   url: string;
   location: Departure;
   photos: PhotoType[];
-};
-
-type Actions = {
-  getNearBySpot: () => PlaceInfo[];
-  setNearBySpot: (placeInfo: PlaceInfo[]) => void;
 };
 
 let map: google.maps.Map;

@@ -27,11 +27,11 @@ const Transportation = ({ date }: { date: string }) => {
                       ?.transportationMethod || [];
                   const isIncluded = targetList.includes(method.id);
                   if (checked && !isIncluded) {
-                    fields.setTripInfo(new Date(date), 'transportation_method', [...targetList, method.id]);
+                    fields.setTripInfo(new Date(date), 'transportationMethod', [...targetList, method.id]);
                   } else if (!checked && isIncluded) {
                     fields.setTripInfo(
                       new Date(date),
-                      'transportation_method',
+                      'transportationMethod',
                       targetList.filter((id) => id !== method.id),
                     );
                   }
