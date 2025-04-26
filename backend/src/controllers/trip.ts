@@ -86,6 +86,40 @@ export const getTripHandler = {
     return c.json(targetTrip, 200);
   },
 
+  deleteTrip: async (c: Context) => {
+    try {
+      const auth = getAuth(c);
+      if (!auth?.userId) {
+        return c.json({ error: 'Unauthorized' }, 401);
+      }
+
+      const tripId = parseInt(c.req.param('id'));
+
+      const targetTrip = await prisma.trip.findFirst({
+        where: {
+          id: tripId,
+          userId: auth.userId,
+        },
+      });
+
+      if (!targetTrip) {
+        return c.json({ error: 'No trip found' }, 404);
+      }
+
+      await prisma.trip.delete({
+        where: {
+          id: tripId,
+        },
+      });
+
+      return c.json({ message: 'Trip deleted successfully' }, 200);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error(errorMessage);
+      return c.json({ error: 'Internal Server Error', details: errorMessage }, 500);
+    }
+  },
+
   // 新しい旅行計画を登録
   createTrip: async (c: Context) => {
     try {

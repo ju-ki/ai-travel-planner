@@ -4,7 +4,7 @@ import { clerkMiddleware } from '@hono/clerk-auth';
 import { cors } from 'hono/cors';
 import { serve } from 'bun';
 
-import { getTripsRoute, createTripRoute, getTripDetailRoute } from './routes/trip';
+import { getTripsRoute, createTripRoute, getTripDetailRoute, deleteTripRoute } from './routes/trip';
 import { getTripHandler } from './controllers/trip';
 import { getHelloRoutes } from './routes/hello';
 import { getHelloHandler } from './controllers/hello';
@@ -51,6 +51,7 @@ helloApp.openapi(getHelloRoutes, getHelloHandler);
 tripApp.openapi(getTripsRoute, getTripHandler.getTrips);
 tripApp.openapi(createTripRoute, getTripHandler.createTrip);
 tripApp.openapi(getTripDetailRoute, getTripHandler.getTripDetail);
+tripApp.openapi(deleteTripRoute, getTripHandler.deleteTrip);
 
 authApp.openapi(findExistingUserRoute, getAuthHandler);
 
