@@ -1,0 +1,43 @@
+import { useAuth } from '@clerk/nextjs';
+
+export const useFetcher = () => {
+  const { getToken } = useAuth();
+
+  const getFetcher = async (url: string) => {
+    const token = await getToken();
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('エラーが発生しました');
+    }
+
+    return response.json();
+  };
+  // あくまで共通化しているので型指定はしない
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const postFetcher = async (url: string, { arg }: { arg: { data: any } }) => {
+    const token = await getToken();
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify(arg.data),
+    });
+
+    if (!response.ok) {
+      throw new Error('エラーが発生しました');
+    }
+
+    return response.json();
+  };
+
+  return { getFetcher, postFetcher };
+};

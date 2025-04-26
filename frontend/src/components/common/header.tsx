@@ -5,27 +5,16 @@ import { MenuIcon } from 'lucide-react';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import useSWR from 'swr';
 
+import { useFetcher } from '@/hooks/use-fetcher';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 import Notification from '../Notification';
 
 const Header = () => {
-  const { getToken } = useAuth();
+  const { getFetcher } = useFetcher();
 
-  const fetcher = async (url: string) => {
-    const token = await getToken();
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      method: 'GET',
-    });
-    return response.json();
-  };
-
-  useSWR('http://localhost:8787/api/auth', fetcher);
+  useSWR(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth`, getFetcher);
   return (
     <header className="flex h-16 w-full items-center justify-between px-4 md:px-6 border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center space-x-3">

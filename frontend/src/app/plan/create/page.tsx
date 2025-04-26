@@ -3,8 +3,8 @@ import { CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { LoadScript } from '@react-google-maps/api';
-import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import useSWRMutation from 'swr/mutation';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,30 +18,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanningComp from '@/components/PlanningComp';
 import { dummyData } from '@/data/dummyData';
 import { useToast } from '@/hooks/use-toast';
+import { useFetcher } from '@/hooks/use-fetcher';
 
 const TravelPlanCreate = () => {
   const fields = useStoreForPlanning();
   const { toast } = useToast();
-  const { getToken } = useAuth();
+  const { postFetcher } = useFetcher();
+  const { trigger } = useSWRMutation(`${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/create`, postFetcher);
   const router = useRouter();
 
   const handleCreatePlan = async () => {
-    const token = await getToken();
-    fetch('http://localhost:8787/api/trips/create', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      method: 'POST',
-      body: JSON.stringify(dummyData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        toast({ title: '旅行計画が作成されました', description: '旅行計画の作成に成功しました。', variant: 'success' });
-        router.push(`/plan/${data.id}`);
-      })
-      .catch((err) =>
-        toast({ title: '旅行計画の作成に失敗しました', description: err.message, variant: 'destructive' }),
-      );
+    try {
+      const result = await trigger({ data: dummyData });
+      toast({ title: '旅行計画が作成されました', description: '旅行計画の作成に成功しました。', variant: 'success' });
+      router.push(`/plan/${result.id}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast({ title: '旅行計画の作成に失敗しました', description: errorMessage, variant: 'destructive' });
+    }
   };
 
   return (

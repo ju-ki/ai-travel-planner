@@ -1,26 +1,15 @@
 'use client';
 
 import useSWR from 'swr';
-import { useAuth } from '@clerk/nextjs';
 
 import { TripCard } from '@/components/TripCard';
 import { TripSearchForm } from '@/components/TripSearchForm';
 import { FormData } from '@/lib/plan';
+import { useFetcher } from '@/hooks/use-fetcher';
 
 export default function TripsPage() {
-  const { getToken } = useAuth();
-  const fetcher = async (url: string) => {
-    const token = await getToken();
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      method: 'GET',
-    });
-    return response.json();
-  };
-  const { data: trips, error, isLoading } = useSWR('http://localhost:8787/api/trips', fetcher);
+  const { getFetcher } = useFetcher();
+  const { data: trips, error, isLoading } = useSWR(`${process.env.NEXT_PUBLIC_API_BASE_URL}/trips`, getFetcher);
 
   if (error) return <div>エラーが発生しました</div>;
   if (isLoading) return <div>読み込み中...</div>;
