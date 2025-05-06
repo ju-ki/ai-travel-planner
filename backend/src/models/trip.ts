@@ -6,6 +6,7 @@ export const TripSchema = z.object({
     .min(1, { message: 'タイトルは必須です' })
     .max(50, { message: 'タイトルの上限を超えています。50文字以下で入力してください' }),
   startDate: z.coerce.date({ message: '予定日の開始日を入力してください' }),
+  imageUrl: z.string().optional(),
   endDate: z.coerce.date({ message: '予定日の終了日を入力してください' }),
   tripInfo: z.array(
     z.object({

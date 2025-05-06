@@ -20,6 +20,8 @@
 /out/
 /dist/
 
+/static
+
 # production
 /build
 

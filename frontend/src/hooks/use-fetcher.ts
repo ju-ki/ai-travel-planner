@@ -21,15 +21,15 @@ export const useFetcher = () => {
   };
   // あくまで共通化しているので型指定はしない
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFetcher = async (url: string, { arg }: { arg: { data: any } }) => {
+  const postFetcher = async (url: string, { arg }: { arg: { data: any; isMulti: boolean } }) => {
     const token = await getToken();
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/json',
       },
       method: 'POST',
-      body: JSON.stringify(arg.data),
+      body: arg.isMulti ? arg.data : JSON.stringify(arg.data),
     });
 
     if (!response.ok) {

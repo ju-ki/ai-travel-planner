@@ -8,6 +8,12 @@ export const requestParams = z
   })
   .openapi('RequestParams');
 
+export const requestFileParams = z
+  .object({
+    fileName: z.string(),
+  })
+  .openapi('RequestParams');
+
 export const getTripsRoute = createRoute({
   method: 'get',
   path: '/',
@@ -24,6 +30,47 @@ export const getTripsRoute = createRoute({
     },
     500: {
       description: '旅行計画取得時のエラー',
+    },
+  },
+});
+
+export const uploadImageRoute = createRoute({
+  method: 'post',
+  path: '/upload',
+  tags: ['Image'],
+  summary: '画像をアップロード',
+  request: {},
+  responses: {
+    201: {
+      description: 'アップロードされた画像のURL',
+      content: {
+        'application/json': {
+          schema: z.object({
+            url: z.string(),
+          }),
+        },
+      },
+    },
+    500: {
+      description: '画像アップロード時のエラー',
+    },
+  },
+});
+
+export const getImageRoute = createRoute({
+  method: 'get',
+  path: '/{fileName}',
+  tags: ['Image'],
+  summary: '画像を取得',
+  request: {
+    params: requestFileParams,
+  },
+  responses: {
+    200: {
+      description: '画像取得成功',
+    },
+    500: {
+      description: '画像取得時のエラー',
     },
   },
 });

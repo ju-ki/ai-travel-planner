@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { LoadScript } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import useSWRMutation from 'swr/mutation';
+import Image from 'next/image';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,9 +15,9 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, getDatesBetween } from '@/lib/utils';
 import { useStoreForPlanning } from '@/lib/plan';
+import type { FormData as formType } from '@/lib/plan';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanningComp from '@/components/PlanningComp';
-import { dummyData } from '@/data/dummyData';
 import { useToast } from '@/hooks/use-toast';
 import { useFetcher } from '@/hooks/use-fetcher';
 
@@ -24,12 +25,48 @@ const TravelPlanCreate = () => {
   const fields = useStoreForPlanning();
   const { toast } = useToast();
   const { postFetcher } = useFetcher();
-  const { trigger } = useSWRMutation(`${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/create`, postFetcher);
+  const { trigger: createTripTrigger } = useSWRMutation(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/create`,
+    postFetcher,
+  );
+  const { trigger: uploadImageTrigger } = useSWRMutation(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/images/upload`,
+    postFetcher,
+  );
   const router = useRouter();
+
+  const onUploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const formData = new FormData();
+    if (!event.target.files || event.target.files.length === 0) {
+      toast({ title: '画像が選択されていません', description: '画像を選択してください', variant: 'destructive' });
+      return;
+    }
+    formData.append('file', event.target.files[0]);
+
+    try {
+      const response = await uploadImageTrigger({ data: formData, isMulti: true });
+      fields.setFields('imageUrl', response.fileName);
+      toast({
+        title: '画像がアップロードされました',
+        description: '画像のアップロードに成功しました。',
+        variant: 'success',
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
 
   const handleCreatePlan = async () => {
     try {
-      const result = await trigger({ data: dummyData });
+      const newData: formType = {
+        title: fields.title,
+        imageUrl: fields.imageUrl,
+        startDate: fields.startDate,
+        endDate: fields.endDate,
+        tripInfo: fields.tripInfo,
+        plans: fields.plans,
+      };
+      const result = await createTripTrigger({ data: newData, isMulti: false });
       toast({ title: '旅行計画が作成されました', description: '旅行計画の作成に成功しました。', variant: 'success' });
       router.push(`/plan/${result.id}`);
     } catch (error) {
@@ -63,7 +100,27 @@ const TravelPlanCreate = () => {
               <div className="space-y-2">
                 <Label>イメージ画像</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <p className="text-sm text-gray-500">ここに画像をアップロードまたはドラッグ＆ドロップ</p>
+                  {fields.imageUrl ? (
+                    <div className="mb-4">
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/images/${fields.imageUrl}`}
+                        alt="アップロードされた画像"
+                        width={300}
+                        height={200}
+                        unoptimized
+                        onError={(e) => {
+                          console.error('Image load error:', e);
+                          console.log(
+                            'Failed to load image:',
+                            `${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${fields.imageUrl?.split('/').pop()}`,
+                          );
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">ここに画像をアップロードまたはドラッグ＆ドロップ</p>
+                  )}
+                  <Input type="file" multiple accept="image/*" onChange={onUploadImage} />
                 </div>
               </div>
               {/* 予定日 */}

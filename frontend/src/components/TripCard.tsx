@@ -17,7 +17,17 @@ export const TripCard = ({ id, title, startDate, endDate, imageUrl }: TripCardPr
     <Link href={`/plan/${id}`}>
       <Card className="overflow-hidden">
         <div className="relative h-40 w-full">
-          <Image src="/scene.webp" alt={title} width={300} height={200} className="rounded-lg shadow-md" />
+          <Image
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/images/${imageUrl}`}
+            alt={title}
+            width={300}
+            height={200}
+            unoptimized
+            onError={(e) => {
+              console.log('Failed to load image:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/images/${imageUrl}`);
+            }}
+            className="rounded-lg shadow-md"
+          />
         </div>
         <CardContent className="p-4">
           <h3 className="text-lg font-bold mb-2 line-clamp-1">{title}</h3>
