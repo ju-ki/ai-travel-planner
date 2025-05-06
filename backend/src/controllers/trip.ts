@@ -143,6 +143,7 @@ export const getTripHandler = {
       const newTrip = await prisma.trip.create({
         data: {
           title: trip.title,
+          imageUrl: trip.imageUrl,
           startDate: new Date(trip.startDate),
           endDate: new Date(trip.endDate),
           userId: auth.userId,

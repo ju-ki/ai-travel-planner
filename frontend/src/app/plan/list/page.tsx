@@ -29,7 +29,7 @@ export default function TripsPage() {
             title={trip.title}
             startDate={trip.startDate}
             endDate={trip.endDate}
-            imageUrl={trip.plans?.[0]?.spots?.[0]?.image}
+            imageUrl={trip.imageUrl}
           />
         ))}
       </div>

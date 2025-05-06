@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "darwin-arm64", "linux-arm64-openssl-1.1.x"]
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -15,6 +15,7 @@ model Trip {
   startDate DateTime
   endDate   DateTime
   userId    String     @db.VarChar(255)
+  imageUrl  String?     @db.VarChar(255)
   plans     Plan[]
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   tripInfo  TripInfo[]
