@@ -10,7 +10,6 @@ import useSWRMutation from 'swr/mutation';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { dummyData } from '@/data/dummyData';
 import { DayPlan } from '@/components/DayPlan';
 import { Button } from '@/components/ui/button';
 import { FormData } from '@/lib/plan';
@@ -92,7 +91,7 @@ const PageDetail = () => {
             ))}
           </TabsList>
 
-          {dummyData.plans.map((plan, index) => (
+          {(trip as FormData).plans.map((plan, index) => (
             <TabsContent key={`day-${index + 1}`} value={`day-${index + 1}`}>
               <DayPlan plan={plan} dayNumber={index + 1} />
             </TabsContent>

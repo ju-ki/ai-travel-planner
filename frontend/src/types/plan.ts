@@ -8,11 +8,6 @@ export type Location = {
   };
 };
 
-type StayDuration = {
-  start: string; // 例: "10:00"
-  end: string; // 例: "11:30"
-};
-
 type Transport = {
   name: string; // 例: "電車" | "バス"
   time: string; // 例: "30分"
@@ -37,8 +32,9 @@ export type Spot = {
   name: string;
   latitude: number;
   longitude: number;
-  stay: StayDuration;
-  transport: Transport;
+  stayStart: string;
+  stayEnd: string;
+  transport?: Transport;
   memo?: string;
   image?: string; // 画像URL (省略可能)
   rating: number; // 例: 4.7
