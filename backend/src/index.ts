@@ -3,7 +3,6 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { clerkMiddleware } from '@hono/clerk-auth';
 import { cors } from 'hono/cors';
 import { serve } from 'bun';
-import { serveStatic } from 'hono/bun';
 
 import { getTripsRoute, createTripRoute, getTripDetailRoute, deleteTripRoute, uploadImageRoute } from './routes/trip';
 import { getTripHandler } from './controllers/trip';
@@ -28,8 +27,6 @@ app.use(
     maxAge: 600,
   }),
 );
-
-app.get('/static/*', serveStatic({ root: './static', mimes: {} }));
 
 //ルートの登録
 const helloApp = new OpenAPIHono();
