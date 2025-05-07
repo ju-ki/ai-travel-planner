@@ -178,9 +178,8 @@ export const getTripHandler = {
                     name: spot.name,
                     latitude: spot.latitude,
                     longitude: spot.longitude,
-                    //TODO: 固定値になっているのを修正する
-                    stayStart: new Date(`2025-01-01T${spot.stayStart}`),
-                    stayEnd: new Date(`2025-01-01T${spot.stayEnd}`),
+                    stayStart: new Date(`${new Date(plan.date).toISOString().split('T')[0]}T${spot.stayStart}`),
+                    stayEnd: new Date(`${new Date(plan.date).toISOString().split('T')[0]}T${spot.stayEnd}`),
                     memo: spot.memo ?? '',
                     image: spot.image ?? '',
                     rating: spot.rating ?? 0,
