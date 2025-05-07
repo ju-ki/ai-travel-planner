@@ -37,10 +37,8 @@ export const TripSchema = z.object({
           name: z.string().min(1, { message: '観光地名は必須です' }),
           latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
           longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
-          stay: z.object({
-            start: z.string(), //TODO: HH:mm形式でのバリデーションにできないか考える
-            end: z.string(),
-          }),
+          stayStart: z.string(), //TODO: HH:mm形式でのバリデーションにできないか考える
+          stayEnd: z.string(),
           memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),
           image: z.string().optional(),
           rating: z.number().optional(),

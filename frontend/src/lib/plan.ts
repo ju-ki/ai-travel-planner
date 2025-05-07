@@ -46,10 +46,8 @@ export const schema = z.object({
           name: z.string().min(1, { message: '観光地名は必須です' }),
           latitude: z.number().min(-90).max(90, { message: '緯度は -90 から 90 の範囲で指定してください' }),
           longitude: z.number().min(-180).max(180, { message: '経度は -180 から 180 の範囲で指定してください' }),
-          stay: z.object({
-            start: z.string().time(),
-            end: z.string().time(),
-          }),
+          stayStart: z.string().time(),
+          stayEnd: z.string().time(),
           memo: z.string().max(1000, { message: 'メモは1000文字以内で記載をお願いします' }).optional(),
           image: z.string().url().optional(),
           rating: z.number().optional(),
@@ -339,7 +337,8 @@ export async function searchByCategory(params: SearchSpotByCategoryParams): Prom
         rating: place.rating || 0,
         latitude: place.location?.lat() ?? 0,
         longitude: place.location?.lng() ?? 0,
-        stay: { start: '09:00', end: '10:00' }, //TODO:仮置き
+        stayStart: '09:00', //TODO:仮置き
+        stayEnd: '10:00', //TODO:仮置き
         category: place.types || [], //TODO: 日本語化
         transport: { name: '徒歩', time: '30分' }, //TODO:仮置き,
       });

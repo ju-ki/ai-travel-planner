@@ -81,3 +81,20 @@ export const getDatesBetween = (start: Date, end: Date) => {
 export const removeTimeFromDate = (date: Date): Date => {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 };
+
+export const formatToHHmm = (date: string): string => {
+  try {
+    const parsedDate = new Date(date);
+
+    if (isNaN(parsedDate.getTime())) {
+      console.error('Invalid date:', date);
+      return '--:--';
+    }
+    const hours = String(parsedDate.getHours()).padStart(2, '0');
+    const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return '--:--';
+  }
+};

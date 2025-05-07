@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Spot } from '@/types/plan';
 
+import { formatToHHmm } from '../lib/utils';
 interface SpotCardProps {
   spot: Spot;
   isLast?: boolean;
@@ -30,7 +31,7 @@ export function SpotCard({ spot, isLast }: SpotCardProps) {
               <p className="text-sm text-muted-foreground">{spot.catchphrase}</p>
             </div>
             <div className="flex gap-1">
-              {spot.category.map((cat) => (
+              {spot.category?.map((cat) => (
                 <Badge key={cat} variant="secondary">
                   {cat}
                 </Badge>
@@ -42,14 +43,14 @@ export function SpotCard({ spot, isLast }: SpotCardProps) {
             <div className="flex items-center gap-2 text-sm">
               <Clock className="w-4 h-4" />
               <span>
-                {spot.stay.start} - {spot.stay.end}
+                {formatToHHmm(spot.stayStart)} - {formatToHHmm(spot.stayEnd)}
               </span>
             </div>
 
             <div className="flex items-center gap-2 text-sm">
               <Train className="w-4 h-4" />
               <span>
-                {spot.transport.name} ({spot.transport.time})
+                {spot.transport?.name} ({spot.transport?.time})
               </span>
             </div>
 
