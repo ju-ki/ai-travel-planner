@@ -34,8 +34,10 @@ const SpotSelection = ({ date }: { date: string }) => {
   const [isCurrentPosition, setIsCurrentPosition] = useState<boolean>(false);
 
   const onSearchSpot = async () => {
+    const searchCenter = selectedPrefecture ? prefectureCenters[selectedPrefecture] : coordinate;
+
     const spots = await searchSpots({
-      center: coordinate,
+      center: searchCenter,
       genreIds: genreIds,
       radius: radius,
       sortOption,
@@ -43,7 +45,7 @@ const SpotSelection = ({ date }: { date: string }) => {
       searchWord,
     });
     if (selectedPrefecture) {
-      setCoordinate(prefectureCenters[selectedPrefecture]);
+      setCoordinate(searchCenter);
     }
     setSpots(spots);
   };

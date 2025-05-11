@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 
-import { Spot } from '@/types/plan';
-
-export type Coordination = { lat: number; lng: number };
+import { Coordination, Spot } from '@/types/plan';
 
 interface MapState {
   spots: Spot[];
