@@ -269,16 +269,13 @@ export type PlaceInfo = {
   photos: PhotoType[];
 };
 
-let map: google.maps.Map;
-
-export async function searchByCategory(params: SearchSpotByCategoryParams): Promise<Spot[]> {
-  const { Place, SearchNearbyRankPreference } = (await google.maps.importLibrary(
+export async function searchSpots(params: SearchSpotByCategoryParams): Promise<Spot[]> {
+  const { Place, SearchNearbyRankPreference, SearchByTextRankPreference } = (await google.maps.importLibrary(
     'places',
   )) as google.maps.PlacesLibrary;
-  const { AdvancedMarkerElement } = (await google.maps.importLibrary('marker')) as google.maps.MarkerLibrary;
 
   // Restrict within the map viewport.
-  const center = new google.maps.LatLng(params.lat, params.lng);
+  const center = new google.maps.LatLng(params.center.lat, params.center.lng);
 
   // 複数ジャンルを指定した場合にgoogle docsのtypeを使用
   //https://developers.google.com/maps/documentation/places/web-service/place-types?hl=ja&_gl=1*tofb5y*_up*MQ..*_ga*MTQ4MDA4MDA0Mi4xNzQzODkxMDQ4*_ga_NRWSTWS78N*MTc0Mzg5MTA0Ny4xLjEuMTc0Mzg5MTMxNy4wLjAuMA..
@@ -287,67 +284,67 @@ export async function searchByCategory(params: SearchSpotByCategoryParams): Prom
     searchCategoryList.push(...placeTypeGroups[genreId]);
   });
 
-  const request: google.maps.places.SearchNearbyRequest = {
-    // required parameters
-    fields: [
-      'displayName',
-      'location',
-      'businessStatus',
-      'googleMapsURI',
-      'photos',
-      'rating',
-      'types',
-      'primaryType',
-      'primaryTypeDisplayName',
-      'attributions',
-      'regularOpeningHours',
-    ],
-    locationRestriction: {
-      center: center,
-      radius: 5000, //TODO:ある程度動的にする?
-    },
-    // optional parameters
-    includedTypes: searchCategoryList,
-    maxResultCount: 10,
-    rankPreference: SearchNearbyRankPreference.POPULARITY,
-    language: 'ja',
-    region: 'JP',
-  };
+  const placeToSpot = (place: google.maps.places.Place): Spot => ({
+    id: place.id,
+    name: place.displayName ?? '',
+    image: place.photos?.[0]?.getURI() ?? '',
+    url: place.googleMapsURI ?? '',
+    rating: place.rating ?? 0,
+    latitude: place.location?.lat() ?? 0,
+    longitude: place.location?.lng() ?? 0,
+    stayStart: '09:00', // TODO: 仮置き
+    stayEnd: '10:00', // TODO: 仮置き
+    category: place.types ?? [], // TODO: 日本語化
+    transport: { name: '徒歩', time: '30分' }, // TODO: 仮置き
+  });
 
-  const { places } = await Place.searchNearby(request);
+  const fields = [
+    'displayName',
+    'location',
+    'businessStatus',
+    'googleMapsURI',
+    'photos',
+    'rating',
+    'types',
+    'primaryType',
+    'primaryTypeDisplayName',
+    'attributions',
+    'regularOpeningHours',
+  ];
 
-  if (places.length) {
-    const { LatLngBounds } = (await google.maps.importLibrary('core')) as google.maps.CoreLibrary;
-    const bounds = new LatLngBounds();
+  if (params.searchWord) {
+    const request: google.maps.places.SearchByTextRequest = {
+      textQuery: params.searchWord,
+      fields: fields,
+      maxResultCount: params.maxResultLimit,
+      rankPreference:
+        params.sortOption === 'distance' ? SearchByTextRankPreference.DISTANCE : SearchByTextRankPreference.RELEVANCE,
+      language: 'ja',
+      region: 'JP',
+    };
+    const { places } = await Place.searchByText(request);
 
-    const results: Spot[] = [];
-    places.forEach((place) => {
-      //TODO: 検索結果をマップ上に表示する
-      // const markerView = new AdvancedMarkerElement({
-      //   map,
-      //   position: place.location,
-      //   title: place.displayName,
-      // });
-      results.push({
-        id: place.id,
-        name: place.displayName || '',
-        image: place.photos?.length
-          ? place.photos.map((photo) => ({ flagContentURI: photo.getURI() }))[0].flagContentURI
-          : '',
-        rating: place.rating || 0,
-        latitude: place.location?.lat() ?? 0,
-        longitude: place.location?.lng() ?? 0,
-        stayStart: '09:00', //TODO:仮置き
-        stayEnd: '10:00', //TODO:仮置き
-        category: place.types || [], //TODO: 日本語化
-        transport: { name: '徒歩', time: '30分' }, //TODO:仮置き,
-      });
-    });
-
-    return results;
+    return places?.map(placeToSpot) ?? [];
   } else {
-    console.log('No results');
-    return [];
+    const request: google.maps.places.SearchNearbyRequest = {
+      // required parameters
+      fields: fields,
+      locationRestriction: {
+        center: center,
+        radius: params.radius * 1000, // 半径をメートルに変換
+      },
+      // optional parameters
+      includedTypes: searchCategoryList,
+      maxResultCount: params.maxResultLimit,
+      rankPreference:
+        params.sortOption === 'popularity'
+          ? SearchNearbyRankPreference.POPULARITY
+          : SearchNearbyRankPreference.DISTANCE,
+      language: 'ja',
+      region: 'JP',
+    };
+    const { places } = await Place.searchNearby(request);
+    return places?.map(placeToSpot) ?? [];
   }
 }
 

@@ -8,6 +8,11 @@ export type Location = {
   };
 };
 
+export type Coordination = {
+  lat: number;
+  lng: number;
+};
+
 type Transport = {
   name: string; // 例: "電車" | "バス"
   time: string; // 例: "30分"
@@ -35,6 +40,7 @@ export type Spot = {
   stayStart: string;
   stayEnd: string;
   transport?: Transport;
+  url?: string;
   memo?: string;
   image?: string; // 画像URL (省略可能)
   rating: number; // 例: 4.7
@@ -51,12 +57,17 @@ export type TravelPlanType = {
   spots: Spot[];
 };
 
-export type PlaceTypeGroupKey = 'culture' | 'nature' | 'leisure' | 'gourmet' | 'shopping' | 'sports' | 'relaxation';
+export type PlaceTypeGroupKey = 'culture' | 'nature' | 'leisure' | 'gourmet';
+
+export type SortOption = 'popularity' | 'distance';
 
 export type SearchSpotByCategoryParams = {
-  lat: number; //基準となる緯度
-  lng: number; //基準となる経度
   genreIds?: PlaceTypeGroupKey[]; //ジャンルリスト
+  center: Coordination; //基準となる地点
+  radius: number; //半径
+  sortOption: SortOption; //ソートオプション
+  maxResultLimit: number; //最大取得件数
+  searchWord?: string; //検索ワード
 };
 
 export type Notification = {
