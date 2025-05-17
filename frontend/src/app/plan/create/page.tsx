@@ -79,7 +79,7 @@ const TravelPlanCreate = () => {
     <div>
       <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}>
         <div className="container mx-auto p-4">
-          <Card className="w-full max-w-4xl mx-auto">
+          <Card className="w-full max-w-6xl mx-auto">
             <CardHeader>
               <CardTitle>旅行計画を作成</CardTitle>
             </CardHeader>

@@ -92,13 +92,7 @@ const PlanningComp = ({ date }: { date: string }) => {
 
       {/* 作成ボタン */}
       <div className="space-y-2">
-        <Button
-          type="button"
-          variant={'outline'}
-          role="button"
-          // onClick={() => pickUpSightseeingAre()}
-          className="w-full"
-        >
+        <Button type="button" variant={'outline'} role="button" className="w-full">
           AIによるシミュレート
         </Button>
       </div>

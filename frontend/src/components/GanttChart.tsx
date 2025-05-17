@@ -2,12 +2,14 @@
 import { DndContext, DragEndEvent, DragMoveEvent, DragStartEvent } from '@dnd-kit/core';
 import { Fragment, useEffect, useState } from 'react';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
+import { X } from 'lucide-react';
 
 import { calcDiffTime, updatedTime } from '@/lib/utils';
 import { Spot } from '@/types/plan';
 import { useStoreForPlanning } from '@/lib/plan';
 
 import { DraggableHandle, DroppableHandle } from './common/DndItem';
+import { Button } from './ui/button';
 
 const GanttChart = ({ date }: { date: string }) => {
   const fields = useStoreForPlanning();
@@ -170,22 +172,40 @@ const GanttChart = ({ date }: { date: string }) => {
     }
   };
 
+  const handleDeleteSpot = (id: string) => {
+    setSpots((prev) => prev.filter((spot) => spot.id !== id));
+    const filteredPlan = fields.plans.find((plan) => plan.date.toLocaleDateString('ja-JP') === date);
+    if (filteredPlan) {
+      const spot = filteredPlan.spots.find((spot) => spot.id === id);
+      if (spot) {
+        fields.setSpots(new Date(date), spot, true);
+      }
+    }
+  };
+
   if (timeSlots.length === 0 || !spots.length) {
     return <div>観光地を選択してください</div>;
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 flex">
+    <div className="w-full max-w-6xl mx-auto p-2 flex">
       {/* 観光地名 */}
-      <div className="w-64 flex-shrink-0">
+      <div className="w-96 flex-shrink-0">
         <div className="font-bold h-8 flex items-center justify-center bg-gray-200">観光地名</div>
-        {spots.length &&
+
+        {spots.length > 0 &&
           spots.map((spot, id) => (
-            <div key={id} className="h-16 flex items-center justify-center border-b border-gray-300 bg-gray-100">
-              {spot.name}
-              <div>
-                ({spot.stayStart} ~ {spot.stayEnd})
+            <div key={id} className="h-16 flex items-center justify-between border-b border-gray-300 bg-gray-100 px-3">
+              <div className="flex flex-col justify-center overflow-hidden">
+                <span className="text-sm font-medium truncate">{spot.name}</span>
+                <span className="text-xs text-gray-500">
+                  ({spot.stayStart} ~ {spot.stayEnd})
+                </span>
               </div>
+
+              <Button variant="ghost" size="icon" onClick={() => handleDeleteSpot(spot.id)}>
+                <X className="w-4 h-4 text-red-500" />
+              </Button>
             </div>
           ))}
       </div>
