@@ -39,7 +39,7 @@ export type Spot = {
   longitude: number;
   stayStart: string;
   stayEnd: string;
-  transport?: Transport;
+  transport: Transport;
   url?: string;
   memo?: string;
   image?: string; // 画像URL (省略可能)

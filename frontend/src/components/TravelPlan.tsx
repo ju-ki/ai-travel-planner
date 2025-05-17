@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Clock, Train, Bus, FootprintsIcon, Info, Check } from 'lucide-react';
+import { MapPin, Clock, Train, Bus, FootprintsIcon, Info, Check, X } from 'lucide-react';
 import Image from 'next/image';
 
 import { TravelPlanType } from '@/types/plan';
@@ -9,6 +9,7 @@ import { useStoreForPlanning } from '@/lib/plan';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import TravelMap from './TravelMap';
+import { Button } from './ui/button';
 
 const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
   const fields = useStoreForPlanning();
@@ -23,6 +24,11 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
     : null;
 
   const { departure, spots, destination, date } = travelPlan;
+
+  const handleDeleteSpot = (id: string) => {
+    const updatedSpots = spots.filter((spot) => spot.id == id)[0];
+    fields.setSpots(new Date(date), updatedSpots, true);
+  };
 
   const transportIcons: Record<string, JSX.Element> = {
     電車: <Train className="w-5 h-5 text-blue-500" />,
@@ -78,10 +84,13 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
 
       {/* 観光スポット */}
       {spots.map((spot, index) => (
-        <div key={index} className="mb-10 border-b border-gray-300 pb-6">
+        <div key={index} className="mb-10 border-b border-gray-300 pb-6 relative">
+          <Button variant="ghost" onClick={() => handleDeleteSpot(spot.id)} className="absolute top-0 right-0">
+            <X className="w-4 h-4 text-red-500" />
+          </Button>
           {/* 移動手段 */}
           <div className="flex items-center space-x-2  text-gray-600 mb-4">
-            {transportIcons[spot.transport.name]}
+            {transportIcons[spot?.transport?.name]}
             <span>
               {spot.transport.name} ({spot.transport.time})
             </span>
@@ -101,7 +110,7 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
             <p className="text-gray-500 flex items-center space-x-1 mt-1">
               <Clock className="w-4 h-4 text-gray-400" />
               <span>
-                {spot.stay.start} - {spot.stay.end}
+                {spot.stayStart} - {spot.stayEnd}
               </span>
             </p>
 
