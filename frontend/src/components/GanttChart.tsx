@@ -174,6 +174,13 @@ const GanttChart = ({ date }: { date: string }) => {
 
   const handleDeleteSpot = (id: string) => {
     setSpots((prev) => prev.filter((spot) => spot.id !== id));
+    const filteredPlan = fields.plans.find((plan) => plan.date.toLocaleDateString('ja-JP') === date);
+    if (filteredPlan) {
+      const spot = filteredPlan.spots.find((spot) => spot.id === id);
+      if (spot) {
+        fields.setSpots(new Date(date), spot, true);
+      }
+    }
   };
 
   if (timeSlots.length === 0 || !spots.length) {

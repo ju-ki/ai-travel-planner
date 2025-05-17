@@ -84,7 +84,7 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
 
       {/* 観光スポット */}
       {spots.map((spot, index) => (
-        <div key={index} className="mb-10 border-b border-gray-300 pb-6 relative">
+        <div key={spot.id} className="mb-10 border-b border-gray-300 pb-6 relative">
           <Button variant="ghost" onClick={() => handleDeleteSpot(spot.id)} className="absolute top-0 right-0">
             <X className="w-4 h-4 text-red-500" />
           </Button>
