@@ -1,0 +1,31 @@
+name: Sync GitHub Issues to Notion
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Run sync script
+        run: python app.py
+        working-directory: ./tools/
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}
+          GITHUB_REPO: "ju-ki/ai-travel-planner"
+          ISSUE_CONTEXT: ${{ toJson(github.event.issue) }}
