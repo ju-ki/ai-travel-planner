@@ -38,8 +38,7 @@ def get_existing_github_numbers() -> List[int]:
 
         res = requests.post(query_url, headers=headers_notion, json=payload)
         if not res.ok:
-            print("Failed to query Notion:", res.text)
-            break
+            raise Exception(f"Failed to query Notion database: {res.status_code} - {res.text}")
 
         data = res.json()
         for result in data.get("results", []):
@@ -68,8 +67,7 @@ def fetch_open_github_issues() -> List[Dict[str, Any]]:
         url = f"https://api.github.com/repos/{github_repo}/issues?state=open&per_page={per_page}&page={page}"
         res = requests.get(url, headers=headers_github)
         if not res.ok:
-            print("GitHub API error:", res.text)
-            break
+            raise Exception(f"GitHub API error: {res.status_code} - {res.text}")
 
         page_issues = res.json()
         if not page_issues:
@@ -140,4 +138,9 @@ def sync_issues():
 
 # 実行
 if __name__ == "__main__":
+  try:
     sync_issues()
+    print("Sync completed successfully!")
+  except Exception as e:
+    print(f"Sync failed: {e}")
+    exit(1)
