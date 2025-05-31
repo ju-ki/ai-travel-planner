@@ -54,27 +54,59 @@ def get_existing_github_numbers() -> List[int]:
     return existing_numbers
 
 # GitHubから全てのIssueのみ取得
-def fetch_open_github_issues() -> List[Dict[str, Any]]:
-    headers_github = {
-        "Authorization": f"Bearer {github_token}",
-        "Accept": "application/vnd.github+json"
+def fetch_all_issues_graphql() -> List[Dict[str, Any]]:
+    query = """
+    query($owner: String!, $name: String!, $cursor: String) {
+      repository(owner: $owner, name: $name) {
+        issues(first: 100, after: $cursor, orderBy: {field: CREATED_AT, direction: DESC}) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            number
+            title
+            state
+            url
+          }
+        }
+      }
     }
-    page = 1
-    per_page = 100
+    """
+
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Content-Type": "application/json"
+    }
+
+    owner, repo = github_repo.split("/")
     issues = []
+    cursor = None
 
     while True:
-        url = f"https://api.github.com/repos/{github_repo}/issues?state=all&per_page={per_page}&page={page}"
-        res = requests.get(url, headers=headers_github)
+        variables = {
+            "owner": owner,
+            "name": repo,
+            "cursor": cursor
+        }
+
+        res = requests.post(
+            "https://api.github.com/graphql",
+            headers=headers,
+            json={"query": query, "variables": variables}
+        )
+
         if not res.ok:
-            raise Exception(f"GitHub API error: {res.status_code} - {res.text}")
+            raise Exception(f"GitHub GraphQL error: {res.status_code} - {res.text}")
 
-        page_issues = res.json()
-        if not page_issues:
+        data = res.json()
+        issue_nodes = data["data"]["repository"]["issues"]["nodes"]
+        issues.extend(issue_nodes)
+
+        page_info = data["data"]["repository"]["issues"]["pageInfo"]
+        if not page_info["hasNextPage"]:
             break
-
-        issues.extend([i for i in page_issues if "pull_request" not in i])
-        page += 1
+        cursor = page_info["endCursor"]
 
     return issues
 
@@ -119,7 +151,7 @@ def search_notion_issue(number: int) -> Optional[str]:
 
 # メイン同期処理
 def sync_issues():
-    github_issues = fetch_open_github_issues()
+    github_issues = fetch_all_issues_graphql()
     existing_numbers = get_existing_github_numbers()
 
     if not existing_numbers:
