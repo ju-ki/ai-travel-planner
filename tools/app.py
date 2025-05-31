@@ -117,7 +117,7 @@ def build_payload(issue: Dict[str, Any]) -> Dict[str, Any]:
         "properties": {
             "Name": {"title": [{"text": {"content": issue["title"]}}]},
             "Github Number": {"number": issue["number"]},
-            "URL": {"url": issue["html_url"]},
+            "URL": {"url": issue["url"]},
             "Status": {"status": {"name": "Closed" if issue["state"] == "closed" else "Open"}},
             "Multi-select": {"relation": [{"id": project_id}]}
         }
