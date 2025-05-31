@@ -112,13 +112,15 @@ def fetch_all_issues_graphql() -> List[Dict[str, Any]]:
 
 # Notionページの作成・更新
 def build_payload(issue: Dict[str, Any]) -> Dict[str, Any]:
+    state = issue["state"]
+    status_name = "Closed" if state.upper() == "CLOSED" else "Open"
     return {
         "parent": {"database_id": database_id},
         "properties": {
             "Name": {"title": [{"text": {"content": issue["title"]}}]},
             "Github Number": {"number": issue["number"]},
             "URL": {"url": issue["url"]},
-            "Status": {"status": {"name": "Closed" if issue["state"] == "closed" else "Open"}},
+            "Status": {"status": {"name": "Closed" if status_name == "closed" else "Open"}},
             "Multi-select": {"relation": [{"id": project_id}]}
         }
     }
