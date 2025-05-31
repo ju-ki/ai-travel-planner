@@ -113,7 +113,6 @@ def fetch_all_issues_graphql() -> List[Dict[str, Any]]:
 # Notionページの作成・更新
 def build_payload(issue: Dict[str, Any]) -> Dict[str, Any]:
     state = issue["state"]
-    print(f"Processing Issue #{issue['number']} - State: {state}")
     status_name = "Closed" if state.upper() == "CLOSED" else "Open"
     return {
         "parent": {"database_id": database_id},
