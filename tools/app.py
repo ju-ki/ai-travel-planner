@@ -53,7 +53,7 @@ def get_existing_github_numbers() -> List[int]:
 
     return existing_numbers
 
-# GitHubからOpen Issueのみ取得
+# GitHubから全てのIssueのみ取得
 def fetch_open_github_issues() -> List[Dict[str, Any]]:
     headers_github = {
         "Authorization": f"Bearer {github_token}",
@@ -64,7 +64,7 @@ def fetch_open_github_issues() -> List[Dict[str, Any]]:
     issues = []
 
     while True:
-        url = f"https://api.github.com/repos/{github_repo}/issues?state=open&per_page={per_page}&page={page}"
+        url = f"https://api.github.com/repos/{github_repo}/issues?state=all&per_page={per_page}&page={page}"
         res = requests.get(url, headers=headers_github)
         if not res.ok:
             raise Exception(f"GitHub API error: {res.status_code} - {res.text}")
