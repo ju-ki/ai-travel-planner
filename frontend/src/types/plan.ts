@@ -2,10 +2,6 @@ export type Location = {
   name: string;
   latitude: number;
   longitude: number;
-  transport?: {
-    name: string;
-    time: string;
-  };
 };
 
 export type Coordination = {
@@ -13,10 +9,22 @@ export type Coordination = {
   lng: number;
 };
 
-type Transport = {
-  name: string; // 例: "電車" | "バス"
-  time: string; // 例: "30分"
+export type Transport = {
+  transportMethodIds: number[];
+  name: TravelModeType; // 例: "電車" | "バス"
+  cost?: number;
+  travelTime: string; // 例: "30分"
+  fromType: TransportNodeType;
+  toType: TransportNodeType;
+  fromLocationId?: string; // 出発地点のID
+  toLocationId?: string; // 到着地点のID
 };
+
+export enum TransportNodeType {
+  DEPARTURE = 'DEPARTURE',
+  DESTINATION = 'DESTINATION',
+  SPOT = 'SPOT',
+}
 
 type NearestStation = {
   name: string; // 最寄駅の名前
@@ -33,18 +41,16 @@ export type TripInfo = {
 };
 
 export type Spot = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  stayStart: string;
-  stayEnd: string;
-  transport: Transport;
+  id?: string;
+  location: Location;
+  stayStart?: string;
+  stayEnd?: string;
+  transports: Transport;
   url?: string;
   memo?: string;
   image?: string; // 画像URL (省略可能)
-  rating: number; // 例: 4.7
-  category: string[]; // 例: ["文化", "歴史"]
+  rating?: number; // 例: 4.7
+  category?: string[]; // 例: ["文化", "歴史"]
   catchphrase?: string; // キャッチコピー
   description?: string; // 説明文
   nearestStation?: NearestStation; // 最寄駅
@@ -52,8 +58,6 @@ export type Spot = {
 
 export type TravelPlanType = {
   date: Date;
-  departure: Location;
-  destination: Location;
   spots: Spot[];
 };
 
@@ -76,4 +80,13 @@ export type Notification = {
   description: string;
   createdAt: Date;
   isRead: boolean;
+};
+
+export type TravelModeType = 'DRIVING' | 'TRANSIT' | 'WALKING' | 'BICYCLING' | 'DEFAULT';
+
+export type TravelModeTypeForDisplay = {
+  [key in TravelModeType]: {
+    icon: JSX.Element;
+    label: string;
+  };
 };

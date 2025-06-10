@@ -24,8 +24,8 @@ export default function TripsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {(trips as FormData[]).map((trip, idx) => (
           <TripCard
-            key={idx}
-            id={idx}
+            key={trip.id}
+            id={trip.id}
             title={trip.title}
             startDate={trip.startDate}
             endDate={trip.endDate}

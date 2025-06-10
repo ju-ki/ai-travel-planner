@@ -167,7 +167,7 @@ const SpotSelection = ({ date }: { date: string }) => {
                     onSelect={() => {
                       const selectedSpots =
                         fields.plans.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]?.spots || [];
-                      const isSelected = selectedSpots.some((s) => s.name === spot.name);
+                      const isSelected = selectedSpots.some((s) => s.location.name === spot.location.name);
 
                       if (!isSelected) {
                         fields.setSpots(new Date(date), spot, false);
@@ -176,10 +176,12 @@ const SpotSelection = ({ date }: { date: string }) => {
                       }
                     }}
                   >
-                    {spot.name}
+                    {spot.location.name}
                     {fields.plans
                       .filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]
-                      ?.spots.some((s) => s.name === spot.name) && <CheckIcon className="mr-2 h-4 w-4" />}
+                      ?.spots.some((s) => s.location.name === spot.location.name) && (
+                      <CheckIcon className="mr-2 h-4 w-4" />
+                    )}
                   </CommandItem>
                 ))
               ) : (

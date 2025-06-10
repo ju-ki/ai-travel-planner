@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { GoogleMap, Marker, Polyline, InfoWindow } from '@react-google-maps/api';
 
-import { TravelPlanType } from '@/types/plan';
-import { getRoute, RouteResult } from '@/lib/plan';
+import { TransportNodeType, TravelModeType, TravelPlanType } from '@/types/plan';
+import { getRoute, RouteResult, useStoreForPlanning } from '@/lib/plan';
 
 const containerStyle = {
   width: '100%',
@@ -13,29 +13,155 @@ const containerStyle = {
   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
 };
 
+const convertToTransportNameToId = (name: TravelModeType): number => {
+  switch (name) {
+    case 'WALKING':
+      return 1; // 徒歩
+    case 'DRIVING':
+      return 2; // 車
+    case 'TRANSIT':
+      return 3; // 公共交通機関
+    case 'BICYCLING':
+      return 4; // 自転車
+    case 'DEFAULT':
+      return 0; // デフォルト（未指定）
+    default:
+      return 0; // デフォルト（未指定）
+  }
+};
+
 interface TravelMapProps {
   travelPlan: TravelPlanType;
 }
 
 const TravelMap = ({ travelPlan }: TravelMapProps) => {
+  const fields = useStoreForPlanning();
   const [routes, setRoutes] = useState<RouteResult[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<{ lat: number; lng: number; name: string } | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  // マップの表示範囲を計算
-  const bounds = new google.maps.LatLngBounds();
-  const path = travelPlan
-    ? [
-        { lat: travelPlan.departure.latitude, lng: travelPlan.departure.longitude },
-        ...travelPlan.spots.map((spot) => ({ lat: spot.latitude, lng: spot.longitude })),
-        { lat: travelPlan.destination.latitude, lng: travelPlan.destination.longitude },
-      ]
-    : [];
-  path.forEach((point) => bounds.extend(point));
+  const departureData = fields.plans
+    .filter((val) => val.date.toLocaleDateString('ja-JP') == new Date(travelPlan.date).toLocaleDateString('ja-JP'))[0]
+    ?.spots.filter((spot) => spot.transports?.fromType === TransportNodeType.DEPARTURE)[0];
+
+  const destinationData = fields.plans
+    .filter((val) => val.date.toLocaleDateString('ja-JP') == new Date(travelPlan.date).toLocaleDateString('ja-JP'))[0]
+    ?.spots.filter((spot) => spot.transports?.toType === TransportNodeType.DESTINATION)[0];
+
+  const spots = fields.plans
+    .filter((val) => val.date.toLocaleDateString('ja-JP') == new Date(travelPlan.date).toLocaleDateString('ja-JP'))[0]
+    ?.spots.filter(
+      (spot) =>
+        spot.transports?.toType !== TransportNodeType.DESTINATION &&
+        spot.transports?.fromType !== TransportNodeType.DEPARTURE,
+    );
+
+  // ルートを計算
+  useEffect(() => {
+    if (!map || !travelPlan) return;
+
+    // マップの表示範囲を計算
+    const bounds = new google.maps.LatLngBounds();
+    const path = travelPlan
+      ? [
+          { lat: departureData.location.latitude, lng: departureData.location.longitude },
+          ...spots.map((spot) => ({ lat: spot.location.latitude, lng: spot.location.longitude })),
+          { lat: destinationData.location.latitude, lng: destinationData.location.longitude },
+        ]
+      : [];
+    path.forEach((point) => bounds.extend(point));
+
+    const calculateRoutes = async () => {
+      const routeResults: RouteResult[] = [];
+
+      // 出発地から最初の観光地
+      const firstRoute = await getRoute(
+        { lat: departureData.location.latitude, lng: departureData.location.longitude },
+        { lat: spots[0].location.latitude, lng: spots[0].location.longitude },
+      );
+
+      fields.setSpots(
+        new Date(travelPlan.date),
+        {
+          ...departureData,
+          transports: {
+            transportMethodIds: [convertToTransportNameToId(firstRoute.travelMode)],
+            name: firstRoute.travelMode || 'DEFAULT',
+            travelTime: firstRoute.duration || '',
+            fromType: TransportNodeType.DEPARTURE,
+            toType: TransportNodeType.SPOT,
+            fromLocationId: departureData.id,
+            toLocationId: spots[0].id,
+          },
+        },
+        false,
+      );
+
+      routeResults.push(firstRoute);
+
+      // 観光地間
+      for (let i = 0; i < spots.length - 1; i++) {
+        const route = await getRoute(
+          { lat: spots[i].location.latitude, lng: spots[i].location.longitude },
+          { lat: spots[i + 1].location.latitude, lng: spots[i + 1].location.longitude },
+        );
+        fields.setSpots(
+          new Date(travelPlan.date),
+          {
+            ...spots[i],
+            transports: {
+              transportMethodIds: [convertToTransportNameToId(route.travelMode)],
+              name: route.travelMode || 'DEFAULT',
+              travelTime: route.duration || '',
+              fromType: TransportNodeType.SPOT,
+              toType: TransportNodeType.SPOT,
+              fromLocationId: spots[i].id,
+              toLocationId: spots[i + 1].id,
+            },
+          },
+          false,
+        );
+        routeResults.push(route);
+      }
+
+      // 最後の観光地から目的地
+      const lastRoute = await getRoute(
+        {
+          lat: spots[spots.length - 1].location.latitude,
+          lng: spots[spots.length - 1].location.longitude,
+        },
+        { lat: destinationData.location.latitude, lng: destinationData.location.longitude },
+      );
+      routeResults.push(lastRoute);
+
+      fields.setSpots(
+        new Date(travelPlan.date),
+        {
+          ...destinationData,
+          transports: {
+            transportMethodIds: [convertToTransportNameToId(lastRoute.travelMode)],
+            name: lastRoute.travelMode || 'DEFAULT',
+            travelTime: lastRoute.duration || '',
+            fromType: TransportNodeType.SPOT,
+            toType: TransportNodeType.DESTINATION,
+            fromLocationId: spots[spots.length - 1].id,
+            toLocationId: destinationData.id,
+          },
+        },
+        false,
+      );
+
+      setRoutes(routeResults);
+    };
+
+    calculateRoutes();
+  }, [map]);
+
+  if (!travelPlan) return null;
 
   // カスタムマーカーアイコン
   const createCustomMarker = (color: string, label: string) => ({
-    path: google.maps.SymbolPath.CIRCLE,
+    path: 2,
     fillColor: color,
     fillOpacity: 1,
     strokeWeight: 2,
@@ -49,52 +175,10 @@ const TravelMap = ({ travelPlan }: TravelMapProps) => {
     },
   });
 
-  // ルートを計算
-  useEffect(() => {
-    if (!map || !travelPlan) return;
-
-    const calculateRoutes = async () => {
-      const routeResults: RouteResult[] = [];
-
-      // 出発地から最初の観光地
-      const firstRoute = await getRoute(
-        { lat: travelPlan.departure.latitude, lng: travelPlan.departure.longitude },
-        { lat: travelPlan.spots[0].latitude, lng: travelPlan.spots[0].longitude },
-      );
-      routeResults.push(firstRoute);
-
-      // 観光地間
-      for (let i = 0; i < travelPlan.spots.length - 1; i++) {
-        const route = await getRoute(
-          { lat: travelPlan.spots[i].latitude, lng: travelPlan.spots[i].longitude },
-          { lat: travelPlan.spots[i + 1].latitude, lng: travelPlan.spots[i + 1].longitude },
-        );
-        routeResults.push(route);
-      }
-
-      // 最後の観光地から目的地
-      const lastRoute = await getRoute(
-        {
-          lat: travelPlan.spots[travelPlan.spots.length - 1].latitude,
-          lng: travelPlan.spots[travelPlan.spots.length - 1].longitude,
-        },
-        { lat: travelPlan.destination.latitude, lng: travelPlan.destination.longitude },
-      );
-      routeResults.push(lastRoute);
-
-      setRoutes(routeResults);
-    };
-
-    calculateRoutes();
-  }, [map, travelPlan]);
-
-  if (!travelPlan) return null;
-
-  const { departure, spots, destination } = travelPlan;
-
   return (
     <div className="relative">
       <GoogleMap
+        center={{ lat: departureData.location.latitude, lng: departureData.location.longitude }}
         mapContainerStyle={containerStyle}
         options={{
           zoom: 12,
@@ -113,33 +197,44 @@ const TravelMap = ({ travelPlan }: TravelMapProps) => {
         }}
         onLoad={(map) => {
           setMap(map);
-          map.fitBounds(bounds);
-          map.panToBounds(bounds);
+          // map.fitBounds(bounds);
+          // map.panToBounds(bounds);
         }}
       >
         {/* 出発地のマーカー */}
         <Marker
-          position={{ lat: departure.latitude, lng: departure.longitude }}
+          position={{ lat: departureData.location.latitude, lng: departureData.location.longitude }}
           icon={createCustomMarker('#FF0000', '出発')}
-          onClick={() => setSelectedMarker({ lat: departure.latitude, lng: departure.longitude, name: departure.name })}
+          onClick={() =>
+            setSelectedMarker({
+              lat: departureData.location.latitude,
+              lng: departureData.location.longitude,
+              name: departureData.location.name,
+            })
+          }
         />
 
         {/* 観光スポットのマーカー */}
         {spots.map((spot, index) => (
           <Marker
             key={spot.id}
-            position={{ lat: spot.latitude, lng: spot.longitude }}
+            position={{ lat: spot.location.latitude, lng: spot.location.longitude }}
             icon={createCustomMarker('#4285F4', `${index + 1}`)}
-            onClick={() => setSelectedMarker({ lat: spot.latitude, lng: spot.longitude, name: spot.name })}
+            onClick={() =>
+              setSelectedMarker({ lat: spot.location.latitude, lng: spot.location.longitude, name: spot.location.name })
+            }
           />
         ))}
-
         {/* 目的地のマーカー */}
         <Marker
-          position={{ lat: destination.latitude, lng: destination.longitude }}
+          position={{ lat: destinationData.location.latitude, lng: destinationData.location.longitude }}
           icon={createCustomMarker('#34A853', '到着')}
           onClick={() =>
-            setSelectedMarker({ lat: destination.latitude, lng: destination.longitude, name: destination.name })
+            setSelectedMarker({
+              lat: destinationData.location.latitude,
+              lng: destinationData.location.longitude,
+              name: destinationData.location.name,
+            })
           }
         />
 

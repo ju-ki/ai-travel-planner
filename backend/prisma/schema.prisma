@@ -35,49 +35,90 @@ model Plan {
   id            Int      @id @default(autoincrement())
   tripId        Int
   date          DateTime
-  departureId   Int
-  destinationId Int
-  departure     Location @relation("departure", fields: [departureId], references: [id])
-  destination   Location @relation("destination", fields: [destinationId], references: [id])
   trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  spots         Spot[]
+  planSpots   PlanSpot[]
 }
 
-model Location {
-  id           Int    @id @default(autoincrement())
-  name         String @db.VarChar(255)
-  latitude     Float
-  longitude    Float
-  departures   Plan[] @relation("departure")
-  destinations Plan[] @relation("destination")
-}
 
 model Spot {
-  id             Int             @id @default(autoincrement())
-  planId         Int
-  name           String          @db.VarChar(255)
-  latitude       Float
-  longitude      Float
-  stayStart      DateTime
-  stayEnd        DateTime
-  memo           String?
-  image          String?
-  rating         Float?
-  categories     String[]
-  catchphrase    String?
-  description    String?
-  nearestStation NearestStation?
-  plan           Plan            @relation(fields: [planId], references: [id], onDelete: Cascade)
+  id         String     @id @db.VarChar(255)
+  meta       SpotMeta?
+  planSpots  PlanSpot[]
+  nearestStations NearestStation[]
+}
+
+model PlanSpot {
+  id         Int       @id @default(autoincrement())
+  plan       Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId     Int
+  spot       Spot      @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  spotId     String
+  stayStart  DateTime?
+  stayEnd    DateTime?
+  memo       String?
+  transports Transport[]
+  fromLocation Transport[] @relation("FromLocation")
+  toLocation   Transport[] @relation("ToLocation")
+}
+
+model SpotMeta {
+  id          String   @id @db.VarChar(255)
+  spotId      String   @unique
+  spot        Spot     @relation(fields: [spotId], references: [id])
+  name        String   @db.VarChar(255)
+  latitude     Float
+  longitude    Float
+  image        String?
+  rating       Float?
+  categories   String[]
+  catchphrase  String?
+  description  String?
+}
+
+model TransportMethod {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(50)
+  transports TransportMethodOnTransport[]
+}
+
+model TransportMethodOnTransport {
+  transportId      Int
+  transportMethodId Int
+  transport        Transport        @relation(fields: [transportId], references: [id], onDelete: Cascade)
+  method           TransportMethod  @relation(fields: [transportMethodId], references: [id], onDelete: Cascade)
+
+  @@id([transportId, transportMethodId])
+}
+
+enum TransportNodeType {
+  DEPARTURE
+  DESTINATION
+  SPOT
+}
+
+model Transport {
+  id                Int              @id @default(autoincrement())
+  fromType       TransportNodeType
+  toType         TransportNodeType
+  travelTime        String?
+  cost              Int?
+  planSpotId        Int?
+  fromLocationId    Int?
+  toLocationId      Int?
+  planSpot         PlanSpot?        @relation(fields: [planSpotId], references: [id])
+  fromLocation     PlanSpot?        @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocation       PlanSpot?        @relation("ToLocation", fields: [toLocationId], references: [id])
+  transportMethods TransportMethodOnTransport[]
 }
 
 model NearestStation {
   id          Int    @id @default(autoincrement())
-  spotId      Int    @unique
+  spotId      String?
   name        String @db.VarChar(255)
   walkingTime Int
   latitude    Float
   longitude   Float
-  spot        Spot   @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  spot        Spot?   @relation(fields: [spotId], references: [id])
 }
 
 model User {

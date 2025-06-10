@@ -23,7 +23,7 @@ const PlanningComp = ({ date }: { date: string }) => {
       <div className="space-y-2">
         <Label>旅行ジャンル</Label>
         <Select
-          onValueChange={(value) => fields.setTripInfo(new Date(date), 'genreId', value)}
+          onValueChange={(value) => fields.setTripInfo(new Date(date), 'genreId', Number.parseInt(value))}
           value={
             fields.tripInfo.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0]?.genreId.toString() || ''
           }

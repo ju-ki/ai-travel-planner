@@ -1,15 +1,23 @@
 'use client';
 
-import { MapPin, Clock, Train, Bus, FootprintsIcon, Info, Check, X } from 'lucide-react';
+import { MapPin, Clock, Train, FootprintsIcon, Info, Check, X, Car, Bike, CircleHelp } from 'lucide-react';
 import Image from 'next/image';
 
-import { TravelPlanType } from '@/types/plan';
+import { TransportNodeType, TravelModeTypeForDisplay, TravelPlanType } from '@/types/plan';
 import { useStoreForPlanning } from '@/lib/plan';
 
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import TravelMap from './TravelMap';
 import { Button } from './ui/button';
+
+export const transportIcons: TravelModeTypeForDisplay = {
+  WALKING: { icon: <FootprintsIcon className="w-5 h-5 text-yellow-500" />, label: '徒歩' },
+  TRANSIT: { icon: <Train className="w-5 h-5 text-blue-500" />, label: '電車' },
+  DRIVING: { icon: <Car className="w-5 h-5 text-gray-700" />, label: '車' },
+  BICYCLING: { icon: <Bike className="w-5 h-5 text-green-500" />, label: '自転車' },
+  DEFAULT: { icon: <CircleHelp className="w-5 h-5 text-gray-400" />, label: '不明' },
+};
 
 const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
   const fields = useStoreForPlanning();
@@ -23,17 +31,13 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
       )[0]?.status
     : null;
 
-  const { departure, spots, destination, date } = travelPlan;
+  const departureData = fields.getSpotInfo(travelPlan.date, TransportNodeType.DEPARTURE);
+  const destinationData = fields.getSpotInfo(travelPlan.date, TransportNodeType.DESTINATION);
+  const spots = fields.getSpotInfo(travelPlan.date, TransportNodeType.SPOT);
 
   const handleDeleteSpot = (id: string) => {
     const updatedSpots = spots.filter((spot) => spot.id == id)[0];
-    fields.setSpots(new Date(date), updatedSpots, true);
-  };
-
-  const transportIcons: Record<string, JSX.Element> = {
-    電車: <Train className="w-5 h-5 text-blue-500" />,
-    バス: <Bus className="w-5 h-5 text-green-500" />,
-    徒歩: <FootprintsIcon className="w-5 h-5 text-yellow-500" />,
+    fields.setSpots(new Date(travelPlan.date), updatedSpots, true);
   };
 
   if (!targetSimulationStatus || targetSimulationStatus === 0 || targetSimulationStatus === 1) {
@@ -78,21 +82,30 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
       <div className="mb-10 border-b border-gray-300 pb-6">
         <div className="flex items-center space-x-2">
           <MapPin className="text-red-500 w-6 h-6" />
-          <h3 className="font-semibold text-lg">{departure.name}</h3>
+          <h3 className="font-semibold text-lg">{departureData[0].location.name}</h3>
         </div>
+      </div>
+
+      {/* 出発地から最初のスポットまでの移動手段 */}
+      <div className="flex items-center space-x-2  text-gray-600 mb-4">
+        {transportIcons[departureData[0].transports.name || 'DEFAULT'].icon}
+        <span>
+          {transportIcons[departureData[0].transports.name || 'DEFAULT'].label} (
+          {departureData[0].transports.travelTime})
+        </span>
       </div>
 
       {/* 観光スポット */}
       {spots.map((spot, index) => (
         <div key={spot.id} className="mb-10 border-b border-gray-300 pb-6 relative">
-          <Button variant="ghost" onClick={() => handleDeleteSpot(spot.id)} className="absolute top-0 right-0">
+          <Button variant="ghost" onClick={() => handleDeleteSpot(spot.id || '')} className="absolute top-0 right-0">
             <X className="w-4 h-4 text-red-500" />
           </Button>
           {/* 移動手段 */}
           <div className="flex items-center space-x-2  text-gray-600 mb-4">
-            {transportIcons[spot?.transport?.name]}
+            {transportIcons[spot.transports.name || 'DEFAULT'].icon}
             <span>
-              {spot.transport.name} ({spot.transport.time})
+              {transportIcons[spot.transports.name || 'DEFAULT'].label} ({spot.transports.travelTime})
             </span>
           </div>
 
@@ -105,7 +118,7 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
 
             <div className="flex items-center space-x-2">
               <MapPin className="text-blue-500 w-6 h-6" />
-              <h3 className="font-semibold text-lg">{spot.name}</h3>
+              <h3 className="font-semibold text-lg">{spot.location.name}</h3>
             </div>
             <p className="text-gray-500 flex items-center space-x-1 mt-1">
               <Clock className="w-4 h-4 text-gray-400" />
@@ -127,7 +140,13 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
             {/* イメージ画像 */}
             {spot.image && (
               <div className="mt-4">
-                <Image src={spot.image} alt={spot.name} width={300} height={200} className="rounded-lg shadow-md" />
+                <Image
+                  src={spot.image || 'scene.webp'}
+                  alt={spot.location.name}
+                  width={300}
+                  height={200}
+                  className="rounded-lg shadow-md"
+                />
               </div>
             )}
 
@@ -139,7 +158,7 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
 
             {/* カテゴリ */}
             <div className="mt-2 flex flex-wrap gap-2">
-              {spot.category.map((cat, idx) => (
+              {spot?.category?.map((cat, idx) => (
                 <span key={idx} className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded">
                   {cat}
                 </span>
@@ -159,18 +178,27 @@ const TravelPlan = ({ travelPlan }: { travelPlan: TravelPlanType }) => {
               <Textarea
                 placeholder="この観光スポットに対するメモや注意点を記載"
                 value={spot.memo || ''}
-                onChange={(e) => fields.setSpots(new Date(date), { ...spot, memo: e.target.value }, false)}
+                onChange={(e) => fields.setSpots(new Date(travelPlan.date), { ...spot, memo: e.target.value }, false)}
               />
             </div>
           </div>
         </div>
       ))}
 
+      {/* 最後のスポットから目的地までの移動手段 */}
+      <div className="flex items-center space-x-2  text-gray-600 mb-4">
+        {transportIcons[destinationData[0].transports.name || 'DEFAULT'].icon}
+        <span>
+          {transportIcons[destinationData[0].transports.name || 'DEFAULT'].label} (
+          {destinationData[0].transports.travelTime})
+        </span>
+      </div>
+
       {/* 最終目的地 */}
       <div className="pb-6">
         <div className="flex items-center space-x-2">
           <MapPin className="text-red-500 w-6 h-6" />
-          <h3 className="font-semibold text-lg">{destination.name}</h3>
+          <h3 className="font-semibold text-lg">{destinationData[0].location.name}</h3>
         </div>
       </div>
     </div>
