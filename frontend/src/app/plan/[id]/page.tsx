@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { FormData } from '@/lib/plan';
 import { useFetcher } from '@/hooks/use-fetcher';
 import { useToast } from '@/hooks/use-toast';
+import { ResponseTripType } from '@/types/plan';
 
 const PageDetail = () => {
   const params = useParams();
@@ -44,7 +45,6 @@ const PageDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}> */}
       <div className="flex gap-2 py-3 px-3 justify-between">
         <div className="p-3">
           <Button variant="outline" size="sm" onClick={() => {}} className="flex items-center gap-1">
@@ -92,7 +92,7 @@ const PageDetail = () => {
             ))}
           </TabsList>
 
-          {(trip as FormData).plans.map((plan, index) => (
+          {(trip as ResponseTripType).plans.map((plan, index) => (
             <TabsContent key={`day-${index + 1}`} value={`day-${index + 1}`}>
               <DayPlan plan={plan} dayNumber={index + 1} />
             </TabsContent>

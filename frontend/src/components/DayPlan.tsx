@@ -4,13 +4,13 @@ import { format } from 'date-fns';
 import { MapPin } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TravelPlanType } from '@/types/plan';
+import { ResponsePlanType } from '@/types/plan';
 
 import { SpotCard } from './SpotCard2';
 import TravelMap from './TravelMap';
 
 interface DayPlanProps {
-  plan: TravelPlanType;
+  plan: ResponsePlanType;
   dayNumber: number;
 }
 
@@ -25,19 +25,23 @@ export function DayPlan({ plan, dayNumber }: DayPlanProps) {
         </CardTitle>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
           <MapPin className="w-4 h-4" />
-          <span>
-            {plan.departure.name} → {plan.destination.name}
-          </span>
+          <span></span>
         </div>
       </CardHeader>
       <CardContent>
         <div className="relative">
-          {plan.spots.map((spot, index) => (
-            <SpotCard key={spot.id} spot={spot} isLast={index === plan.spots.length - 1} />
+          {plan.planSpots.map((planSpot, index) => (
+            <SpotCard
+              key={planSpot.id}
+              spot={planSpot.spot}
+              spotInfo={planSpot}
+              isLast={index === plan.planSpots.length - 1}
+            />
           ))}
 
           <div>
-            <TravelMap travelPlan={plan} />
+            {/* TODO 並び順が考慮できていないため一旦コメントアウト */}
+            {/* <TravelMap travelPlan={plan} /> */}
           </div>
         </div>
       </CardContent>

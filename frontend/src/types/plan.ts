@@ -61,6 +61,60 @@ export type TravelPlanType = {
   spots: Spot[];
 };
 
+export type ResponseTripType = {
+  id: number;
+  title: string;
+  imageUrl?: string;
+  startDate: Date;
+  endDate: Date;
+  tripInfo: ResponseTripInfoType;
+  plans: ResponsePlanType[];
+};
+
+export type ResponseTripInfoType = {
+  date: Date;
+  genreId: number;
+  transportationMethod: number[];
+  memo?: string;
+};
+
+export type ResponsePlanType = {
+  id: number;
+  tripId: number;
+  date: Date;
+  planSpots: ResponsePlanSpotType[];
+};
+
+export type ResponsePlanSpotType = {
+  id: number;
+  plan: ResponsePlanType;
+  planId: number;
+  spot: ResponseSpotType;
+  spotId: string;
+  stayStart: string;
+  stayEnd: string;
+  memo?: string;
+};
+
+export type ResponseSpotType = {
+  id: string;
+  meta: ResponseSpotMetaType;
+  nearestStation: NearestStation;
+};
+
+export type ResponseSpotMetaType = {
+  id: string;
+  spotId: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  image?: string;
+  rating: number;
+  categories: string[];
+  catchphrase?: string;
+  description?: string;
+};
+
 export type PlaceTypeGroupKey = 'culture' | 'nature' | 'leisure' | 'gourmet';
 
 export type SortOption = 'popularity' | 'distance';

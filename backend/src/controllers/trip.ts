@@ -55,7 +55,25 @@ export const getTripHandler = {
       },
       include: {
         tripInfo: true,
-        plans: true,
+        plans: {
+          include: {
+            planSpots: {
+              include: {
+                spot: {
+                  include: {
+                    meta: true,
+                    nearestStations: true,
+                  },
+                },
+                transports: {
+                  include: {
+                    transportMethods: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
