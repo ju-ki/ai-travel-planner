@@ -4,6 +4,7 @@ import { Check, MapPinIcon } from 'lucide-react';
 import { useStoreForPlanning } from '@/lib/plan';
 import { destinations } from '@/data/dummyData';
 import { TransportNodeType } from '@/types/plan';
+import { buildSpotId } from '@/lib/utils';
 
 import { Label } from './ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -47,7 +48,7 @@ const Destination = ({ date }: { date: string }) => {
                     fields.setSpots(
                       new Date(date),
                       {
-                        id: 'destination', //TODO
+                        id: buildSpotId('destination', date, destination.latitude, destination.longitude),
                         location: {
                           name: destination.name,
                           latitude: destination.latitude,
