@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, MapPin, Star, Train } from 'lucide-react';
+import { Clock, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spot } from '@/types/plan';
 
 import { formatToHHmm } from '../lib/utils';
+import { transportIcons } from './TravelPlan';
 interface SpotCardProps {
   spot: Spot;
   isLast?: boolean;
@@ -48,9 +49,9 @@ export function SpotCard({ spot, isLast }: SpotCardProps) {
             </div>
 
             <div className="flex items-center gap-2 text-sm">
-              <Train className="w-4 h-4" />
+              {transportIcons[spot.transport?.name || 'DEFAULT'].icon}
               <span>
-                {spot.transport?.name} ({spot.transport?.time})
+                {transportIcons[spot.transport?.name || 'DEFAULT'].label} ({spot.transport?.time})
               </span>
             </div>
 

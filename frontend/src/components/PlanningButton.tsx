@@ -40,19 +40,19 @@ const PlanningButton = ({ date }: { date: string }) => {
       isError = true;
     }
 
-    if (!targetPlans || !targetPlans.departure.name) {
-      fields.setPlanErrors(new Date(date), {
-        departure: '出発地を選択してください',
-      });
-      isError = true;
-    }
+    // if (!targetPlans || !targetPlans.departure.name) {
+    //   fields.setPlanErrors(new Date(date), {
+    //     departure: '出発地を選択してください',
+    //   });
+    //   isError = true;
+    // }
 
-    if (!targetPlans || !targetPlans.destination.name) {
-      fields.setPlanErrors(new Date(date), {
-        destination: '目的地を選択してください',
-      });
-      isError = true;
-    }
+    // if (!targetPlans || !targetPlans.destination.name) {
+    //   fields.setPlanErrors(new Date(date), {
+    //     destination: '目的地を選択してください',
+    //   });
+    //   isError = true;
+    // }
 
     if (!targetPlans.spots.length) {
       fields.setPlanErrors(new Date(date), {

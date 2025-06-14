@@ -2,7 +2,6 @@
 import { CalendarIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { LoadScript } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
 import useSWRMutation from 'swr/mutation';
 import Image from 'next/image';
@@ -77,131 +76,127 @@ const TravelPlanCreate = () => {
 
   return (
     <div>
-      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}>
-        <div className="container mx-auto p-4">
-          <Card className="w-full max-w-6xl mx-auto">
-            <CardHeader>
-              <CardTitle>旅行計画を作成</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* タイトル */}
-              <div className="space-y-2">
-                <Label htmlFor="title">タイトル</Label>
-                <Input
-                  id="title"
-                  placeholder="旅行プランのタイトルを入力"
-                  onChange={(e) => fields.setFields('title', e.target.value)}
-                />
-                {/* {methods.formState.errors.title && (
+      <div className="container mx-auto p-4">
+        <Card className="w-full max-w-4xl mx-auto">
+          <CardHeader>
+            <CardTitle>旅行計画を作成</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* タイトル */}
+            <div className="space-y-2">
+              <Label htmlFor="title">タイトル</Label>
+              <Input
+                id="title"
+                placeholder="旅行プランのタイトルを入力"
+                onChange={(e) => fields.setFields('title', e.target.value)}
+              />
+              {/* {methods.formState.errors.title && (
                 <span className="text-red-500">{methods.formState.errors.title.message}</span>
               )} */}
-              </div>
-              {/* イメージ画像 */}
-              <div className="space-y-2">
-                <Label>イメージ画像</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  {fields.imageUrl ? (
-                    <div className="mb-4">
-                      <Image
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/images/${fields.imageUrl}`}
-                        alt="アップロードされた画像"
-                        width={300}
-                        height={200}
-                        unoptimized
-                        onError={(e) => {
-                          console.error('Image load error:', e);
-                          console.log(
-                            'Failed to load image:',
-                            `${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${fields.imageUrl?.split('/').pop()}`,
-                          );
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">ここに画像をアップロードまたはドラッグ＆ドロップ</p>
-                  )}
-                  <Input type="file" multiple accept="image/*" onChange={onUploadImage} />
-                </div>
-              </div>
-              {/* 予定日 */}
-              <div className="space-y-2">
-                <Label>予定日</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="date"
-                      variant={'outline'}
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !fields.startDate && 'text-muted-foreground',
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {fields.startDate ? (
-                        fields.endDate ? (
-                          <>
-                            {format(fields.startDate, 'yyyy/MM/dd')} 〜 {format(fields.endDate, 'yyyy/MM/dd')}
-                          </>
-                        ) : (
-                          format(fields.startDate, 'yyyy/MM/dd')
-                        )
-                      ) : (
-                        <span>日付範囲を選択</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      defaultMonth={fields.startDate}
-                      selected={{
-                        from: fields.startDate,
-                        to: fields.endDate,
+            </div>
+            {/* イメージ画像 */}
+            <div className="space-y-2">
+              <Label>イメージ画像</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                {fields.imageUrl ? (
+                  <div className="mb-4">
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/images/${fields.imageUrl}`}
+                      alt="アップロードされた画像"
+                      width={300}
+                      height={200}
+                      unoptimized
+                      onError={(e) => {
+                        console.error('Image load error:', e);
+                        console.log(
+                          'Failed to load image:',
+                          `${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${fields.imageUrl?.split('/').pop()}`,
+                        );
                       }}
-                      onSelect={(dateRange: DateRange | undefined) => {
-                        fields.setRangeDate({
-                          from: dateRange?.from,
-                          to: dateRange?.to,
-                        });
-                      }}
-                      numberOfMonths={2}
                     />
-                  </PopoverContent>
-                </Popover>
-                <div className="my-1">
-                  {fields.errors.startDate && (
-                    <span className="text-red-500">{fields.errors.startDate.toString()}</span>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">ここに画像をアップロードまたはドラッグ＆ドロップ</p>
+                )}
+                <Input type="file" multiple accept="image/*" onChange={onUploadImage} />
               </div>
+            </div>
+            {/* 予定日 */}
+            <div className="space-y-2">
+              <Label>予定日</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    variant={'outline'}
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !fields.startDate && 'text-muted-foreground',
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {fields.startDate ? (
+                      fields.endDate ? (
+                        <>
+                          {format(fields.startDate, 'yyyy/MM/dd')} 〜 {format(fields.endDate, 'yyyy/MM/dd')}
+                        </>
+                      ) : (
+                        format(fields.startDate, 'yyyy/MM/dd')
+                      )
+                    ) : (
+                      <span>日付範囲を選択</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={fields.startDate}
+                    selected={{
+                      from: fields.startDate,
+                      to: fields.endDate,
+                    }}
+                    onSelect={(dateRange: DateRange | undefined) => {
+                      fields.setRangeDate({
+                        from: dateRange?.from,
+                        to: dateRange?.to,
+                      });
+                    }}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+              <div className="my-1">
+                {fields.errors.startDate && <span className="text-red-500">{fields.errors.startDate.toString()}</span>}
+              </div>
+            </div>
 
-              {/* 選択した日付分だけタブが生成されるようにする */}
-              <Tabs defaultValue={fields.startDate.toLocaleDateString('ja-JP')} defaultChecked={true}>
-                <TabsList className="flex justify-start space-x-2">
-                  {getDatesBetween(fields.startDate, fields.endDate).map((date) => (
-                    <TabsTrigger key={date} value={date}>
-                      {date}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+            {/* 選択した日付分だけタブが生成されるようにする */}
+            <Tabs defaultValue={fields.startDate.toLocaleDateString('ja-JP')} defaultChecked={true}>
+              <TabsList className="flex justify-start space-x-2">
                 {getDatesBetween(fields.startDate, fields.endDate).map((date) => (
-                  <TabsContent key={date} value={date}>
-                    <PlanningComp date={date} />
-                  </TabsContent>
+                  <TabsTrigger key={date} value={date}>
+                    {date}
+                  </TabsTrigger>
                 ))}
-              </Tabs>
+              </TabsList>
+              {getDatesBetween(fields.startDate, fields.endDate).map((date) => (
+                <TabsContent key={date} value={date}>
+                  <PlanningComp date={date} />
+                </TabsContent>
+              ))}
+            </Tabs>
 
-              {/* 作成ボタン */}
-              <div className="space-y-2">
-                <Button onClick={() => handleCreatePlan()} type="button" role="button" className="w-full">
-                  旅行計画を作成
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </LoadScript>
+            {/* 作成ボタン */}
+            <div className="space-y-2">
+              <Button onClick={() => handleCreatePlan()} type="button" role="button" className="w-full">
+                旅行計画を作成
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

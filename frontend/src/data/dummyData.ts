@@ -1,4 +1,3 @@
-import { FormData } from '@/lib/plan';
 import { Notification, TravelPlanType } from '@/types/plan';
 
 export const initialActivities: TravelPlanType = {

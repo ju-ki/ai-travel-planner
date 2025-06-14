@@ -44,6 +44,7 @@ const PageDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}> */}
       <div className="flex gap-2 py-3 px-3 justify-between">
         <div className="p-3">
           <Button variant="outline" size="sm" onClick={() => {}} className="flex items-center gap-1">
@@ -98,6 +99,7 @@ const PageDetail = () => {
           ))}
         </Tabs>
       </div>
+      {/* </LoadScript> */}
     </div>
   );
 };

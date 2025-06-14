@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TravelPlanType } from '@/types/plan';
 
 import { SpotCard } from './SpotCard2';
+import TravelMap from './TravelMap';
 
 interface DayPlanProps {
   plan: TravelPlanType;
@@ -34,6 +35,10 @@ export function DayPlan({ plan, dayNumber }: DayPlanProps) {
           {plan.spots.map((spot, index) => (
             <SpotCard key={spot.id} spot={spot} isLast={index === plan.spots.length - 1} />
           ))}
+
+          <div>
+            <TravelMap travelPlan={plan} />
+          </div>
         </div>
       </CardContent>
     </Card>

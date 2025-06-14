@@ -5,7 +5,7 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { X } from 'lucide-react';
 
 import { calcDiffTime, updatedTime } from '@/lib/utils';
-import { Spot } from '@/types/plan';
+import { Spot, TransportNodeType } from '@/types/plan';
 import { useStoreForPlanning } from '@/lib/plan';
 
 import { DraggableHandle, DroppableHandle } from './common/DndItem';
@@ -18,12 +18,12 @@ const GanttChart = ({ date }: { date: string }) => {
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
 
   useEffect(() => {
-    const filteredSpots = fields.plans.filter((val) => val.date.toLocaleDateString('ja-JP') === date)[0];
-    if (filteredSpots) {
-      setSpots(filteredSpots.spots);
+    const filteredSpots = fields.getSpotInfo(new Date(date), TransportNodeType.SPOT);
+    if (filteredSpots.length > 0) {
+      setSpots(filteredSpots);
       setDraggedItems(
-        filteredSpots.spots.map((val) => ({
-          id: val.id,
+        filteredSpots.map((val) => ({
+          id: val.id || '',
           isDragged: false,
         })),
       );
@@ -77,7 +77,7 @@ const GanttChart = ({ date }: { date: string }) => {
     if (event.over) {
       const [spotId, newTime] = event.over.id.toString().split('-').map(String);
       if (type === 'start') {
-        const endTime = spots.filter((activity) => activity.id === draggingId)[0].stayEnd;
+        const endTime = spots.filter((activity) => activity.id === draggingId)[0].stayEnd || '24:00';
         // 始点が終点を超える場合はこれ以上ドラッグしない
         if (newTime >= endTime) {
           return;
@@ -86,7 +86,7 @@ const GanttChart = ({ date }: { date: string }) => {
           prev.map((activity) => (activity.id === draggingId ? { ...activity, start: newTime } : activity)),
         );
       } else if (type === 'end') {
-        const startTime = spots.filter((activity) => activity.id === draggingId)[0].stayStart;
+        const startTime = spots.filter((activity) => activity.id === draggingId)[0].stayStart || '24:00';
         // 終点が始点を下回る場合はこれ以上ドラッグしない
         if (newTime <= startTime) {
           return;
@@ -96,8 +96,8 @@ const GanttChart = ({ date }: { date: string }) => {
         );
       } else {
         //現在の時間を取得
-        const startTime = spots.filter((activity) => activity.id === draggingId)[0].stayStart;
-        const endTime = spots.filter((activity) => activity.id === draggingId)[0].stayEnd;
+        const startTime = spots.filter((activity) => activity.id === draggingId)[0].stayStart || '24:00';
+        const endTime = spots.filter((activity) => activity.id === draggingId)[0].stayEnd || '24:00';
         //選択している時間とドロップ先の差分を取得
         const diffTime = calcDiffTime(newTime, type);
         //差分をもとに始点と終点を更新
@@ -115,7 +115,7 @@ const GanttChart = ({ date }: { date: string }) => {
       const prevData = spots.filter((activity) => activity.id === spotId)[0];
       // 始点が終点を超える場合は反映させない
       if (type === 'start') {
-        if (newTime > prevData.stayEnd) {
+        if (newTime > (prevData.stayEnd || '24:00')) {
           return;
         }
         setDraggedItems((prev) =>
@@ -129,7 +129,7 @@ const GanttChart = ({ date }: { date: string }) => {
         }
       } else if (type === 'end') {
         // 終点が始点を下回る場合は反映しない
-        if (newTime < prevData.stayStart) {
+        if (newTime < (prevData.stayStart || '24:00')) {
           return;
         }
         setDraggedItems((prev) =>
@@ -144,8 +144,8 @@ const GanttChart = ({ date }: { date: string }) => {
         }
       } else {
         //現在の時間を取得
-        const startTime = spots.filter((activity) => activity.id === spotId)[0].stayStart;
-        const endTime = spots.filter((activity) => activity.id === spotId)[0].stayEnd;
+        const startTime = spots.filter((activity) => activity.id === spotId)[0].stayStart || '24:00';
+        const endTime = spots.filter((activity) => activity.id === spotId)[0].stayEnd || '24:00';
         //選択している時間とドロップ先の差分を取得
         const diffTime = calcDiffTime(newTime, type);
         //差分をもとに始点と終点を更新
@@ -197,13 +197,13 @@ const GanttChart = ({ date }: { date: string }) => {
           spots.map((spot, id) => (
             <div key={id} className="h-16 flex items-center justify-between border-b border-gray-300 bg-gray-100 px-3">
               <div className="flex flex-col justify-center overflow-hidden">
-                <span className="text-sm font-medium truncate">{spot.name}</span>
+                <span className="text-sm font-medium truncate">{spot.location.name}</span>
                 <span className="text-xs text-gray-500">
                   ({spot.stayStart} ~ {spot.stayEnd})
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={() => handleDeleteSpot(spot.id)}>
+              <Button variant="ghost" size="icon" onClick={() => handleDeleteSpot(spot.id || '')}>
                 <X className="w-4 h-4 text-red-500" />
               </Button>
             </div>
@@ -237,15 +237,20 @@ const GanttChart = ({ date }: { date: string }) => {
                 return (
                   <Fragment key={index}>
                     {timeRange.map((minute) => {
-                      const isStart = isStartPoint(timeSlot.split(':')[0], minute, spot.id);
-                      const isEnd = isEndPoint(Number.parseInt(timeSlot.split(':')[0]), minute, spot.id);
+                      const isStart = isStartPoint(timeSlot.split(':')[0], minute, spot.id || '');
+                      const isEnd = isEndPoint(Number.parseInt(timeSlot.split(':')[0]), minute, spot.id || '');
                       const isDragged = draggedItems.filter((val) => val.id === spot.id)[0].isDragged;
                       return (
                         <DroppableHandle
                           key={minute}
                           id={`${spot.id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
                         >
-                          {isTimeWithinRange(timeSlot.split(':')[0], minute, spot.stayStart, spot.stayEnd) && (
+                          {isTimeWithinRange(
+                            timeSlot.split(':')[0],
+                            minute,
+                            spot.stayStart || '24:00',
+                            spot.stayEnd || '24:00',
+                          ) && (
                             <DraggableHandle
                               id={`${spot.id}-${timeSlot.split(':')[0]}:${String(minute).padEnd(2, '0')}`}
                               isStart={false}
@@ -257,7 +262,7 @@ const GanttChart = ({ date }: { date: string }) => {
                           )}
                           {isStart && (
                             <DraggableHandle
-                              id={spot.id}
+                              id={spot.id || ''}
                               isStart
                               isEnd={false}
                               isDragged={isDragged}
@@ -267,7 +272,7 @@ const GanttChart = ({ date }: { date: string }) => {
                           )}
                           {isEnd && (
                             <DraggableHandle
-                              id={spot.id}
+                              id={spot.id || ''}
                               isStart={false}
                               isEnd
                               isDragged={isDragged}

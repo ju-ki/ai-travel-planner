@@ -28,7 +28,7 @@ const GoogleMapComponent: React.FC<GoogleMapCompProps> = ({ isSetCurrentLocation
 
     const bounds = new window.google.maps.LatLngBounds();
     spots.forEach((spot) => {
-      bounds.extend({ lat: spot.latitude, lng: spot.longitude });
+      bounds.extend({ lat: spot.location.latitude, lng: spot.location.longitude });
     });
 
     if (spots.length === 1) {
@@ -73,30 +73,30 @@ const GoogleMapComponent: React.FC<GoogleMapCompProps> = ({ isSetCurrentLocation
         <MarkerF
           onClick={() => {
             setSelectedSpot(spot);
-            map?.panTo({ lat: spot.latitude, lng: spot.longitude });
+            map?.panTo({ lat: spot.location.latitude, lng: spot.location.longitude });
             map?.setZoom(17);
           }}
           key={spot.id}
-          position={{ lat: spot.latitude, lng: spot.longitude }}
-          title={spot.name}
+          position={{ lat: spot.location.latitude, lng: spot.location.longitude }}
+          title={spot.location.name}
         />
       ))}
 
       {selectedSpot ? (
         <InfoWindow
           position={{
-            lat: selectedSpot.latitude,
-            lng: selectedSpot.longitude,
+            lat: selectedSpot.location.latitude,
+            lng: selectedSpot.location.longitude,
           }}
           onCloseClick={() => {
             setSelectedSpot(null);
           }}
         >
           <div className="text-sm space-y-1">
-            <div className="font-bold">{selectedSpot.name}</div>
+            <div className="font-bold">{selectedSpot.location.name}</div>
             <Image
               src={selectedSpot.image ?? 'not_found.png'}
-              alt={selectedSpot.name}
+              alt={selectedSpot.location.name}
               width={100}
               height={30}
               className="rounded-lg"
