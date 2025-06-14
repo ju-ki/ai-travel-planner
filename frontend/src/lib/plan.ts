@@ -202,11 +202,11 @@ export const useStoreForPlanning = create<FormState>()(
           );
           const existingSpotIndex = state.plans[existingPlansIndex].spots.findIndex((info) => info.id === spot.id);
 
-          if (existingSpotIndex > 0 && !isDeleted) {
+          if (existingSpotIndex >= 0 && !isDeleted) {
             state.plans[existingPlansIndex].spots[existingSpotIndex] = spot;
-          } else if (existingSpotIndex > 0 && isDeleted) {
+          } else if (existingSpotIndex >= 0 && isDeleted) {
             state.plans[existingPlansIndex].spots.splice(existingSpotIndex, 1);
-          } else if (existingSpotIndex <= 0 && !isDeleted) {
+          } else if (existingSpotIndex < 0 && !isDeleted) {
             state.plans[existingPlansIndex].spots.push(spot);
           }
         });

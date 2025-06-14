@@ -22,17 +22,7 @@ export const getTripHandler = {
         where: { userId: userId },
         include: {
           tripInfo: true,
-          plans: {
-            include: {
-              departure: true,
-              destination: true,
-              spots: {
-                include: {
-                  nearestStation: true,
-                },
-              },
-            },
-          },
+          plans: true,
         },
       });
 
@@ -65,17 +55,7 @@ export const getTripHandler = {
       },
       include: {
         tripInfo: true,
-        plans: {
-          include: {
-            departure: true,
-            destination: true,
-            spots: {
-              include: {
-                nearestStation: true,
-              },
-            },
-          },
-        },
+        plans: true,
       },
     });
 
@@ -167,12 +147,7 @@ export const getTripHandler = {
             plan.spots.filter((spot) => !allSpotsList.some((existingSpot) => existingSpot.id === spot.id)),
           );
 
-          //TODO:なぜかdepartureが2件渡ってくるため除外
-          const uniqueNonExistingSpot = Array.from(new Set(nonExistingSpot.map((spot) => spot.id))).map(
-            (id) => nonExistingSpot.find((spot) => spot.id === id)!,
-          );
-
-          for (const spot of uniqueNonExistingSpot) {
+          for (const spot of nonExistingSpot) {
             await tx.spot.create({
               data: {
                 id: spot.id,
@@ -264,6 +239,7 @@ export const getTripHandler = {
       } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
           console.error(`Prisma error code: ${error.code}`);
+          console.log(error);
           return c.json({ error: 'Internal Server Error', details: error.code }, 500);
         } else if (error instanceof Prisma.PrismaClientValidationError) {
           console.error(error);
