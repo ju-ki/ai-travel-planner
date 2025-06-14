@@ -67,7 +67,7 @@ export type ResponseTripType = {
   imageUrl?: string;
   startDate: Date;
   endDate: Date;
-  tripInfo: ResponseTripInfoType;
+  tripInfo: ResponseTripInfoType[];
   plans: ResponsePlanType[];
 };
 
