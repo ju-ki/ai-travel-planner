@@ -47,7 +47,13 @@ const Destination = ({ date }: { date: string }) => {
                     fields.setSpots(
                       new Date(date),
                       {
-                        id: 'destination', //TODO
+                        id:
+                          'destination_' +
+                          date +
+                          '_' +
+                          destination.latitude.toString().split('.')[1] +
+                          '_' +
+                          destination.longitude.toString().split('.')[1],
                         location: {
                           name: destination.name,
                           latitude: destination.latitude,
