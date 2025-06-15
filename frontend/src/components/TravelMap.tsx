@@ -73,6 +73,7 @@ const TravelMap = ({ travelPlan }: TravelMapProps) => {
 
     const calculateRoutes = async () => {
       const routeResults: RouteResult[] = [];
+      let orderNumber = 0;
 
       // 出発地から最初の観光地
       const firstRoute = await getRoute(
@@ -90,9 +91,8 @@ const TravelMap = ({ travelPlan }: TravelMapProps) => {
             travelTime: firstRoute.duration || '',
             fromType: TransportNodeType.DEPARTURE,
             toType: TransportNodeType.SPOT,
-            fromLocationId: departureData.id,
-            toLocationId: spots[0].id,
           },
+          order: orderNumber,
         },
         false,
       );
@@ -100,58 +100,74 @@ const TravelMap = ({ travelPlan }: TravelMapProps) => {
       routeResults.push(firstRoute);
 
       // 観光地間
-      for (let i = 0; i < spots.length - 1; i++) {
-        const route = await getRoute(
-          { lat: spots[i].location.latitude, lng: spots[i].location.longitude },
-          { lat: spots[i + 1].location.latitude, lng: spots[i + 1].location.longitude },
-        );
-        fields.setSpots(
-          new Date(travelPlan.date),
-          {
-            ...spots[i],
-            transports: {
-              transportMethodIds: [convertToTransportNameToId(route.travelMode)],
-              name: route.travelMode || 'DEFAULT',
-              travelTime: route.duration || '',
-              fromType: TransportNodeType.SPOT,
-              toType: TransportNodeType.SPOT,
-              fromLocationId: spots[i].id,
-              toLocationId: spots[i + 1].id,
+      for (let i = 0; i < spots.length; i++) {
+        orderNumber += 1;
+        // 最後の観光地は目的地のルートを生成する
+        if (i == spots.length - 1) {
+          const lastRoute = await getRoute(
+            {
+              lat: spots[i].location.latitude,
+              lng: spots[i].location.longitude,
             },
-          },
-          false,
-        );
-        routeResults.push(route);
+            { lat: destinationData.location.latitude, lng: destinationData.location.longitude },
+          );
+          routeResults.push(lastRoute);
+          fields.setSpots(
+            new Date(travelPlan.date),
+            {
+              ...spots[i],
+              transports: {
+                transportMethodIds: [convertToTransportNameToId(lastRoute.travelMode)],
+                name: lastRoute.travelMode || 'DEFAULT',
+                travelTime: lastRoute.duration || '',
+                fromType: TransportNodeType.SPOT,
+                toType: TransportNodeType.SPOT,
+              },
+              order: orderNumber,
+            },
+            false,
+          );
+
+          orderNumber += 1;
+          // 目的のスポットの情報更新
+          fields.setSpots(
+            new Date(travelPlan.date),
+            {
+              ...destinationData,
+              transports: {
+                transportMethodIds: [convertToTransportNameToId('DEFAULT')],
+                name: 'DEFAULT',
+                travelTime: '',
+                fromType: TransportNodeType.DESTINATION,
+                toType: TransportNodeType.DESTINATION,
+              },
+              order: orderNumber,
+            },
+            false,
+          );
+        } else {
+          const route = await getRoute(
+            { lat: spots[i].location.latitude, lng: spots[i].location.longitude },
+            { lat: spots[i + 1].location.latitude, lng: spots[i + 1].location.longitude },
+          );
+          fields.setSpots(
+            new Date(travelPlan.date),
+            {
+              ...spots[i],
+              transports: {
+                transportMethodIds: [convertToTransportNameToId(route.travelMode)],
+                name: route.travelMode || 'DEFAULT',
+                travelTime: route.duration || '',
+                fromType: TransportNodeType.SPOT,
+                toType: TransportNodeType.SPOT,
+              },
+              order: orderNumber,
+            },
+            false,
+          );
+          routeResults.push(route);
+        }
       }
-
-      // 最後の観光地から目的地
-      const lastRoute = await getRoute(
-        {
-          lat: spots[spots.length - 1].location.latitude,
-          lng: spots[spots.length - 1].location.longitude,
-        },
-        { lat: destinationData.location.latitude, lng: destinationData.location.longitude },
-      );
-      routeResults.push(lastRoute);
-
-      fields.setSpots(
-        new Date(travelPlan.date),
-        {
-          ...destinationData,
-          transports: {
-            transportMethodIds: [convertToTransportNameToId(lastRoute.travelMode)],
-            name: lastRoute.travelMode || 'DEFAULT',
-            travelTime: lastRoute.duration || '',
-            fromType: TransportNodeType.SPOT,
-            toType: TransportNodeType.DESTINATION,
-            fromLocationId: spots[spots.length - 1].id,
-            toLocationId: destinationData.id,
-          },
-        },
-        false,
-      );
-
-      setRoutes(routeResults);
     };
 
     calculateRoutes();

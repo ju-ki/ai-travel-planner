@@ -60,10 +60,9 @@ export const schema = z.object({
               cost: z.number().optional(),
               fromType: z.nativeEnum(TransportNodeType),
               toType: z.nativeEnum(TransportNodeType),
-              fromLocationId: z.string().optional(),
-              toLocationId: z.string().optional(),
             })
             .optional(),
+          order: z.number().default(0),
           nearestStation: z
             .object({
               name: z.string(),
@@ -302,6 +301,7 @@ export async function searchSpots(params: SearchSpotByCategoryParams): Promise<S
       fromType: TransportNodeType.SPOT,
       toType: TransportNodeType.SPOT,
     },
+    order: 0,
   });
 
   const fields = [

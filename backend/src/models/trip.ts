@@ -45,9 +45,8 @@ export const TripSchema = z.object({
             cost: z.number().optional(),
             fromType: z.nativeEnum(TransportNodeType),
             toType: z.nativeEnum(TransportNodeType),
-            fromLocationId: z.string().optional(),
-            toLocationId: z.string().optional(),
           }),
+          order: z.number().default(0),
           nearestStation: z
             .object({
               name: z.string(),
