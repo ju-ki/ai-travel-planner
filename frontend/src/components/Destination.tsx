@@ -54,6 +54,7 @@ const Destination = ({ date }: { date: string }) => {
                           latitude: destination.latitude,
                           longitude: destination.longitude,
                         },
+                        order: 0,
                         transports: {
                           travelTime: '不明',
                           cost: 0,

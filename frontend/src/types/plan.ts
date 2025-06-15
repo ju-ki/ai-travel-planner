@@ -16,8 +16,6 @@ export type Transport = {
   travelTime: string; // 例: "30分"
   fromType: TransportNodeType;
   toType: TransportNodeType;
-  fromLocationId?: string; // 出発地点のID
-  toLocationId?: string; // 到着地点のID
 };
 
 export enum TransportNodeType {
@@ -54,6 +52,7 @@ export type Spot = {
   catchphrase?: string; // キャッチコピー
   description?: string; // 説明文
   nearestStation?: NearestStation; // 最寄駅
+  order: number;
 };
 
 export type TravelPlanType = {

@@ -37,6 +37,7 @@ model Plan {
   date          DateTime
   trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   planSpots   PlanSpot[]
+  transports   Transport[]
 }
 
 
@@ -56,7 +57,7 @@ model PlanSpot {
   stayStart  DateTime?
   stayEnd    DateTime?
   memo       String?
-  transports Transport[]
+  order      Int @default(0)
   fromLocation Transport[] @relation("FromLocation")
   toLocation   Transport[] @relation("ToLocation")
 }
@@ -98,16 +99,16 @@ enum TransportNodeType {
 
 model Transport {
   id                Int              @id @default(autoincrement())
+  planId            Int
   fromType       TransportNodeType
   toType         TransportNodeType
   travelTime        String?
   cost              Int?
-  planSpotId        Int?
-  fromLocationId    Int?
-  toLocationId      Int?
-  planSpot         PlanSpot?        @relation(fields: [planSpotId], references: [id])
-  fromLocation     PlanSpot?        @relation("FromLocation", fields: [fromLocationId], references: [id])
-  toLocation       PlanSpot?        @relation("ToLocation", fields: [toLocationId], references: [id])
+  fromSpotId    Int?
+  toSpotId      Int?
+  plan          Plan                @relation(fields: [planId], references: [id], onDelete: Cascade)
+  fromLocation     PlanSpot?        @relation("FromLocation", fields: [fromSpotId], references: [id])
+  toLocation       PlanSpot?        @relation("ToLocation", fields: [toSpotId], references: [id])
   transportMethods TransportMethodOnTransport[]
 }
 

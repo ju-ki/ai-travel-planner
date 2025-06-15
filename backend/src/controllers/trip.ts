@@ -53,21 +53,18 @@ export const getTripHandler = {
         id: tripId,
         userId: auth.userId,
       },
+
       include: {
         tripInfo: true,
         plans: {
           include: {
             planSpots: {
+              orderBy: { order: 'asc' },
               include: {
                 spot: {
                   include: {
                     meta: true,
                     nearestStations: true,
-                  },
-                },
-                transports: {
-                  include: {
-                    transportMethods: true,
                   },
                 },
               },
@@ -211,20 +208,86 @@ export const getTripHandler = {
                       stayStart: new Date(plan.date),
                       stayEnd: new Date(plan.date),
                       memo: spot.memo ?? null,
-                      transports: {
-                        create: {
-                          fromType: spot.transports.fromType,
-                          toType: spot.transports.toType,
-                          cost: spot.transports.cost ?? 0,
-                          travelTime: spot.transports.travelTime ?? '不明',
-                        },
-                      },
+                      order: spot.order, // スポットの順序を設定
                     })),
                   },
                 })),
               },
             },
           });
+
+          // 交通手段は別途作成（PlanSpotが作成された後）
+          for (const planData of tripData.plans) {
+            const createdPlan = await tx.plan.findFirst({
+              where: {
+                tripId: newTrip.id,
+                date: new Date(planData.date),
+              },
+              include: {
+                planSpots: {
+                  orderBy: { order: 'asc' },
+                },
+              },
+            });
+
+            if (createdPlan) {
+              // スポット間の交通手段を作成
+              for (let i = 0; i < createdPlan.planSpots.length - 1; i++) {
+                const fromSpot = createdPlan.planSpots[i];
+                const toSpot = createdPlan.planSpots[i + 1];
+
+                const transportData = planData.spots[i].transports; // 対応する交通手段データ
+
+                await tx.transport.create({
+                  data: {
+                    planId: createdPlan.id,
+                    fromType: 'SPOT',
+                    toType: 'SPOT',
+                    fromSpotId: fromSpot.id,
+                    toSpotId: toSpot.id,
+                    cost: transportData.cost ?? 0,
+                    travelTime: transportData.travelTime ?? '不明',
+                    transportMethods: {
+                      create:
+                        transportData.transportMethodIds?.map((methodId: number) => ({
+                          transportMethodId: methodId,
+                        })) ?? [],
+                    },
+                  },
+                });
+              }
+
+              // 最初のスポットへの交通手段（出発地から）
+              if (createdPlan.planSpots.length > 0) {
+                const firstSpot = createdPlan.planSpots[0];
+                await tx.transport.create({
+                  data: {
+                    planId: createdPlan.id,
+                    fromType: 'DEPARTURE',
+                    toType: 'SPOT',
+                    toSpotId: firstSpot.id,
+                    cost: 0,
+                    travelTime: '出発',
+                  },
+                });
+              }
+
+              // 最後のスポットからの交通手段（目的地へ）
+              if (createdPlan.planSpots.length > 0) {
+                const lastSpot = createdPlan.planSpots[createdPlan.planSpots.length - 1];
+                await tx.transport.create({
+                  data: {
+                    planId: createdPlan.id,
+                    fromType: 'SPOT',
+                    toType: 'DESTINATION',
+                    fromSpotId: lastSpot.id,
+                    cost: 0,
+                    travelTime: '帰宅',
+                  },
+                });
+              }
+            }
+          }
 
           createdTrip = await tx.trip.findFirst({
             where: { id: newTrip.id, userId: userId },
@@ -238,11 +301,6 @@ export const getTripHandler = {
                         include: {
                           meta: true,
                           nearestStations: true,
-                        },
-                      },
-                      transports: {
-                        include: {
-                          transportMethods: true,
                         },
                       },
                     },
