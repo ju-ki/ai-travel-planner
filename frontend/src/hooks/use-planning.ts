@@ -122,6 +122,7 @@ export const usePlanning = () => {
           stayEnd: spot.stayEnd,
           stayDuration: spot.stayDuration,
           routeToNext: spot.routeToNext,
+          nearestStation: spot.nearestStation,
         });
       }
 

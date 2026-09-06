@@ -185,6 +185,15 @@ export async function createOrUpdatePlanLocation(
       planId: data.planId,
     })
     .returning();
+
+  // 新規で追加された場合はUserLocationの使用回数を更新
+  if (data.userLocationId && !data.planLocationId) {
+    await database
+      .update(userLocation)
+      .set({ usageCount: sql`${userLocation.usageCount} + 1`, updatedAt: new Date().toISOString() })
+      .where(and(eq(userLocation.id, data.userLocationId), eq(userLocation.userId, userId)));
+  }
+
   return created;
 }
 

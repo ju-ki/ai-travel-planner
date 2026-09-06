@@ -379,43 +379,13 @@ export const updateTrip = async (transactionDb: AnyDbType, c: Context) => {
         })
         .returning();
 
-      const createdPlanSpots = [];
-      for (const spotData of planData.spots) {
-        const [newPlanSpot] = await tx
-          .insert(planSpot)
-          .values({
-            planId: newPlan.id,
-            spotId: spotData.id,
-            stayStart: spotData.stayStart,
-            stayEnd: spotData.stayEnd,
-            stayDuration: spotData.stayDuration ?? 60,
-            memo: spotData.memo ?? null,
-            order: spotData.order,
-          })
-          .returning();
-        createdPlanSpots.push(newPlanSpot);
-      }
+      // スポット情報を登録する
+      await createPlanSpot(tx, newPlan.id, planData.spots);
 
       // 出発地の情報を登録する
       await createPlanLocation(tx, newPlan.id, userId, planData.departure);
       // 目的地の情報を登録する
       await createPlanLocation(tx, newPlan.id, userId, planData.destination);
-
-      // // ユーザーのお気に入り地点が登録された場合は、使用回数を更新する
-      // if (planData.departure.userLocationId) {
-      //   await tx
-      //     .update(userLocation)
-      //     .set({ usageCount: (planData.departure.usageCount ?? 0) + 1, updatedAt: new Date().toISOString() })
-      //     .where(and(eq(userLocation.id, planData.departure.userLocationId), eq(userLocation.userId, userId)));
-      // }
-      // // 最後のスポットからの目的地への交通手段（目的地へ）- スポットがある場合のみ
-      // // ユーザーのお気に入り地点が登録された場合は、使用回数を更新する
-      // if (planData.destination.userLocationId) {
-      //   await tx
-      //     .update(userLocation)
-      //     .set({ usageCount: (planData.destination.usageCount ?? 0) + 1, updatedAt: new Date().toISOString() })
-      //     .where(and(eq(userLocation.id, planData.destination.userLocationId), eq(userLocation.userId, userId)));
-      // }
     }
   });
   return { id: tripId };
