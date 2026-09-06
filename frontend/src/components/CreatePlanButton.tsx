@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { TripType } from '@shared/trip/types';
 
 import { useToast } from '@/hooks/use-toast';
 import { useStoreForPlanning } from '@/lib/plan';
@@ -7,17 +8,18 @@ import { getDatesBetween, getActualSpotCount } from '@/lib/utils';
 import { TransportNodeType } from '@/types/plan';
 import { isSpotsPerDayLimitReached, isPlanDaysLimitReached, getLimitErrorMessage } from '@/lib/limits';
 import { useFetchTripDetail } from '@/hooks/use-trip';
-import { TripType } from '@/models/trip';
 import { PLANNING_DIRTY_BLOCK_MESSAGE } from '@/data/constants';
 
 import { Button } from './ui/button';
+
+type CreatePlanButtonProps = { isEdit: true; tripId: string } | { isEdit?: false; tripId?: string };
 
 /**
  * プラン保存前のバリデーションと保存実行を担うボタン。
  * dirty状態の保存ブロックと、保存成功時の初期化・遷移を扱う。
  * @returns 保存ボタンUI
  */
-const CreatePlanButton = ({ isEdit = false }: { isEdit: boolean }) => {
+const CreatePlanButton = ({ isEdit = false, tripId }: CreatePlanButtonProps) => {
   const fields = useStoreForPlanning();
   const router = useRouter();
   const { toast } = useToast();
@@ -137,7 +139,6 @@ const CreatePlanButton = ({ isEdit = false }: { isEdit: boolean }) => {
       });
 
       const newData: TripType = {
-        id: fields.id,
         title: fields.title,
         imageUrl: fields.imageUrl,
         startDate: fields.startDate,
@@ -146,8 +147,8 @@ const CreatePlanButton = ({ isEdit = false }: { isEdit: boolean }) => {
       };
 
       let resultId;
-      if (newData.id && isEdit) {
-        resultId = await patchTrip(newData);
+      if (isEdit) {
+        resultId = await patchTrip(Number(tripId), newData);
         toast({ title: '旅行計画が更新されました', description: '旅行計画の更新に成功しました。', variant: 'success' });
       } else {
         resultId = await postTrip(newData);

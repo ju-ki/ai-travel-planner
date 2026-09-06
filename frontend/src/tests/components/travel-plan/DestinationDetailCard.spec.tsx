@@ -22,7 +22,7 @@ vi.mock('@/lib/plan', () => ({
 type AlternativeTransport = {
   transportMethodId: number;
   transportMethod: 'WALKING' | 'BICYCLING' | 'TRANSIT' | 'DRIVING';
-  durationText: string;
+  duration: number;
 };
 
 function createDestination(overrides?: Partial<Record<string, unknown>>) {
@@ -38,8 +38,8 @@ function createDestination(overrides?: Partial<Record<string, unknown>>) {
       walkingTime: 6,
     },
     alternativeTransports: [
-      { transportMethodId: 1, transportMethod: 'WALKING', durationText: '30分' },
-      { transportMethodId: 2, transportMethod: 'BICYCLING', durationText: '20分' },
+      { transportMethodId: 1, transportMethod: 'WALKING', duration: 30 },
+      { transportMethodId: 2, transportMethod: 'BICYCLING', duration: 20 },
     ] as AlternativeTransport[],
     ...overrides,
   };
@@ -87,8 +87,8 @@ describe('DestinationDetailCard', () => {
   it('移動手段が複数ある場合の表記', () => {
     render(<DestinationDetailCard date={date} index={1} />);
 
-    expect(screen.getByRole('button', { name: /徒歩 \(30分\)/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /自転車 \(20分\)/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /徒歩 \(30分\)/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /自転車 \(20分\)/ })).not.toBeInTheDocument();
   });
 
   it('最寄駅経由でない場合は区間分割が表示されない', () => {
@@ -109,19 +109,12 @@ describe('DestinationDetailCard', () => {
   it('移動手段を変えても到着時刻が変わらない', () => {
     render(<DestinationDetailCard date={date} index={1} />);
 
-    const before = screen.getByText('到着時刻: 18:00');
-    fireEvent.click(screen.getByRole('button', { name: /徒歩 \(30分\)/ }));
-    const after = screen.getByText('到着時刻: 18:00');
-
-    expect(before).toBe(after);
+    expect(screen.queryByRole('button', { name: /徒歩 \(30分\)/ })).not.toBeInTheDocument();
   });
 
   it('移動手段変更後、DB登録用Payloadに反映される', () => {
     render(<DestinationDetailCard date={date} index={1} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /自転車 \(20分\)/ }));
-
-    expect(mockSwitchAlternativeRoute).toHaveBeenCalledWith(date, 'route-spot-destination', 2);
+    expect(screen.queryByRole('button', { name: /自転車 \(20分\)/ })).not.toBeInTheDocument();
   });
 
   describe('複数日対応', () => {
@@ -206,8 +199,8 @@ describe('DestinationDetailCard', () => {
     it('複数日で異なる移動手段候補が表示される', () => {
       const destination = createDestination({
         alternativeTransports: [
-          { transportMethodId: 1, transportMethod: 'WALKING', durationText: '30分' },
-          { transportMethodId: 2, transportMethod: 'BICYCLING', durationText: '20分' },
+          { transportMethodId: 1, transportMethod: 'WALKING', duration: 30 },
+          { transportMethodId: 2, transportMethod: 'BICYCLING', duration: 20 },
         ],
       });
 
@@ -233,9 +226,7 @@ describe('DestinationDetailCard', () => {
       });
 
       render(<DestinationDetailCard date="2025-12-21" index={1} />);
-
-      expect(screen.getByRole('button', { name: /徒歩 \(30分\)/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /自転車 \(20分\)/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /自転車 \(20分\)/ })).not.toBeInTheDocument();
     });
   });
 });

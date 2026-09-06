@@ -30,17 +30,16 @@ import {
 } from '@/data/mockNearestStation';
 import { searchNearestStation } from '@/lib/google-maps';
 import { cn } from '@/lib/utils';
-import { NearestStation } from '@/types/plan';
-import { Coordination, Spot } from '@/types/plan';
+import { ExtendNearestStationType, ExtendPlanLocationType, ExtendSpotType } from '@/types/plan';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 export type PlanSpotSettingCardProps = {
-  spot: Spot;
-  previousLocation: Coordination;
-  previousSpot?: Spot;
+  spot: ExtendSpotType;
+  nextSpot?: ExtendSpotType;
+  destinationData?: ExtendPlanLocationType;
   totalSpots: number;
-  onSettingChange: (setting: Spot) => void;
+  onSettingChange: (setting: ExtendSpotType) => void;
   distanceFromPrevious?: number;
   onOrderChange: (spotId: string, newOrder: number) => void;
   isDragging?: boolean;
@@ -55,7 +54,8 @@ export type PlanSpotSettingCardProps = {
 
 export default function PlanSpotSettingCard({
   spot,
-  previousSpot,
+  nextSpot,
+  destinationData,
   totalSpots,
   onSettingChange,
   distanceFromPrevious,
@@ -83,11 +83,20 @@ export default function PlanSpotSettingCard({
   const minutes = currentStayDuration % 60;
 
   const shouldRecommend = distanceFromPrevious ? shouldRecommendNearestStation(distanceFromPrevious) : false;
-
   const [useNearestStation, setUseNearestStation] = useState<boolean>(!!spot.nearestStation);
+  const [canDisplayTransitInfo, setCanDisplayTransitInfo] = useState<boolean>(
+    !!spot.nearestStation && (!!nextSpot?.nearestStation || !!destinationData?.nearestStation),
+  );
+
+  useEffect(() => {
+    setCanDisplayTransitInfo(
+      !!spot.nearestStation && (!!nextSpot?.nearestStation || !!destinationData?.nearestStation),
+    );
+  }, [spot.nearestStation, nextSpot?.nearestStation, destinationData?.nearestStation]);
+
   const [excludeBusStop, setExcludeBusStop] = useState<boolean>(false);
-  const [nearestStations, setNearestStations] = useState<NearestStation[]>(
-    [spot.nearestStation].filter((s): s is NearestStation => !!s),
+  const [nearestStations, setNearestStations] = useState<ExtendNearestStationType[]>(
+    [spot.nearestStation].filter((s): s is ExtendNearestStationType => !!s),
   );
   const [isLoadingStations, setIsLoadingStations] = useState(false);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(spot.nearestStation?.placeId || null);
@@ -107,7 +116,7 @@ export default function PlanSpotSettingCard({
 
   const lastSearchBusStop = useRef<boolean>(excludeBusStop);
   const lastSearchCoord = useRef<{ lat: number; lng: number } | null>(
-    spot.location ? { lat: spot.location.lat, lng: spot.location.lng } : null,
+    spot.latitude && spot.longitude ? { lat: spot.latitude, lng: spot.longitude } : null,
   );
 
   useEffect(() => {
@@ -126,10 +135,14 @@ export default function PlanSpotSettingCard({
   const fetchNearestStations = async () => {
     setIsLoadingStations(true);
     try {
-      const stations = await searchNearestStation({ center: spot.location, radius: 1, excludeBusStop });
+      const stations = await searchNearestStation({
+        center: { id: '', name: '', lat: spot.latitude, lng: spot.longitude },
+        radius: 1,
+        excludeBusStop,
+      });
       setNearestStations(stations);
       lastSearchBusStop.current = excludeBusStop;
-      lastSearchCoord.current = spot.location ? { lat: spot.location.lat, lng: spot.location.lng } : null;
+      lastSearchCoord.current = spot.latitude && spot.longitude ? { lat: spot.latitude, lng: spot.longitude } : null;
     } catch (error) {
       console.error('最寄駅の取得に失敗しました:', error);
     } finally {
@@ -143,8 +156,8 @@ export default function PlanSpotSettingCard({
     if (
       checked &&
       (lastSearchBusStop.current !== excludeBusStop ||
-        lastSearchCoord.current?.lat !== spot.location?.lat ||
-        lastSearchCoord.current?.lng !== spot.location?.lng ||
+        lastSearchCoord.current?.lat !== spot.latitude ||
+        lastSearchCoord.current?.lng !== spot.longitude ||
         nearestStations.length === 0)
     ) {
       fetchNearestStations();
@@ -170,6 +183,8 @@ export default function PlanSpotSettingCard({
 
       onSettingChange({
         ...spot,
+        transportMethodId: 4,
+        transportMethod: 'TRANSIT',
         nearestStation: {
           spotId: station.spotId,
           placeId: stationId,
@@ -182,7 +197,6 @@ export default function PlanSpotSettingCard({
           isManualTransitTime: false,
           scheduledDepartureTime,
           scheduledDepartureTimes: scheduledDepartureTimes.filter((candidate) => candidate !== ''),
-          transportMethodId: 1,
         },
       });
     }
@@ -326,7 +340,7 @@ export default function PlanSpotSettingCard({
 
           <div className="w-full min-w-0 flex-1 sm:w-auto">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-medium truncate">{spot.location.name}</h4>
+              <h4 className="font-medium truncate">{spot.name}</h4>
               {distanceFromPrevious !== undefined && (
                 <p className="text-sm text-gray-500">前のスポットから{(distanceFromPrevious / 1000).toFixed(1)} km</p>
               )}
@@ -466,7 +480,7 @@ export default function PlanSpotSettingCard({
                         )}
                       </div>
 
-                      {spot.nearestStation && previousSpot && previousSpot?.nearestStation && (
+                      {canDisplayTransitInfo && (
                         <div className="p-3 bg-green-50 rounded-lg border border-green-200 space-y-3">
                           <div className="flex items-center gap-2 mb-2">
                             <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
@@ -559,26 +573,13 @@ export default function PlanSpotSettingCard({
                         </div>
                       )}
 
-                      {spot.nearestStation && previousSpot && previousSpot?.nearestStation && (
-                        <div className="rounded bg-gray-100 p-2 text-sm text-gray-600 break-words">
+                      {spot.nearestStation && nextSpot && nextSpot?.nearestStation && (
+                        <div
+                          className="rounded bg-gray-100 p-2 text-sm text-gray-600 break-words"
+                          data-testid="route-info"
+                        >
                           <span className="font-medium">ルート: </span>
-                          <span>{previousSpot.location.name}</span>
-                          {previousSpot.nearestStation && (
-                            <>
-                              <span className="mx-1">→</span>
-                              <span className="text-blue-600">
-                                {previousSpot.nearestStation?.name}
-                                (徒歩{previousSpot.nearestStation?.walkingTime}分)
-                              </span>
-                              <span className="mx-1">→</span>
-                            </>
-                          )}
-                          {spot.nearestStation && previousSpot && previousSpot?.nearestStation && (
-                            <>
-                              <span className="mx-1">→</span>
-                              <span className="text-green-600">🚃 {transitTime}分</span>
-                            </>
-                          )}
+                          <span>{spot.name}</span>
                           {selectedStationId && (
                             <>
                               <span className="mx-1">→</span>
@@ -588,8 +589,50 @@ export default function PlanSpotSettingCard({
                               </span>
                             </>
                           )}
+                          <>
+                            <span className="mx-1">→</span>
+                            <span className="text-green-600">🚃 {transitTime}分</span>
+                          </>
+                          <>
+                            <span className="mx-1">→</span>
+                            <span className="text-blue-600">
+                              {nextSpot.nearestStation?.name}
+                              (徒歩{nextSpot.nearestStation?.walkingTime}分)
+                            </span>
+                          </>
                           <span className="mx-1">→</span>
-                          <span>{spot.location.name}</span>
+                          <span>{nextSpot.name}</span>
+                        </div>
+                      )}
+                      {spot.nearestStation && destinationData && destinationData.nearestStation && (
+                        <div
+                          className="rounded bg-gray-100 p-2 text-sm text-gray-600 break-words"
+                          data-testid="route-info"
+                        >
+                          <span className="font-medium">ルート: </span>
+                          <span>{spot.name}</span>
+                          {selectedStationId && (
+                            <>
+                              <span className="mx-1">→</span>
+                              <span className="text-blue-600">
+                                {spot.nearestStation?.name}
+                                (徒歩{spot.nearestStation?.walkingTime}分)
+                              </span>
+                            </>
+                          )}
+                          <>
+                            <span className="mx-1">→</span>
+                            <span className="text-green-600">🚃 {transitTime}分</span>
+                          </>
+                          <>
+                            <span className="mx-1">→</span>
+                            <span className="text-blue-600">
+                              {destinationData.nearestStation?.name}
+                              (徒歩{destinationData.nearestStation?.walkingTime}分)
+                            </span>
+                          </>
+                          <span className="mx-1">→</span>
+                          <span>{destinationData.name}</span>
                         </div>
                       )}
                     </>
@@ -597,33 +640,26 @@ export default function PlanSpotSettingCard({
                 </div>
               )}
 
-              {useNearestStation &&
-                !isStationSectionExpanded &&
-                (spot.nearestStation || previousSpot?.nearestStation) && (
-                  <div className="px-4 py-2 text-sm text-gray-600 border-t bg-gray-50">
-                    {previousSpot?.nearestStation && (
-                      <span className="mr-3">
-                        <Badge
-                          variant="outline"
-                          className="bg-orange-100 text-orange-700 border-orange-300 text-xs mr-1"
-                        >
-                          出発
-                        </Badge>
-                      </span>
-                    )}
-                    {spot.nearestStation && previousSpot?.nearestStation && (
-                      <span className="text-gray-400 mr-3">→</span>
-                    )}
-                    {spot.nearestStation && (
-                      <span>
-                        <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300 text-xs mr-1">
-                          到着
-                        </Badge>
-                        {nearestStations.find((s) => s.placeId === selectedStationId)?.name}
-                      </span>
-                    )}
-                  </div>
-                )}
+              {useNearestStation && !isStationSectionExpanded && (spot.nearestStation || nextSpot?.nearestStation) && (
+                <div className="px-4 py-2 text-sm text-gray-600 border-t bg-gray-50">
+                  {nextSpot?.nearestStation && (
+                    <span className="mr-3">
+                      <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300 text-xs mr-1">
+                        出発
+                      </Badge>
+                    </span>
+                  )}
+                  {spot.nearestStation && nextSpot?.nearestStation && <span className="text-gray-400 mr-3">→</span>}
+                  {spot.nearestStation && (
+                    <span>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300 text-xs mr-1">
+                        到着
+                      </Badge>
+                      {nearestStations.find((s) => s.placeId === selectedStationId)?.name}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
