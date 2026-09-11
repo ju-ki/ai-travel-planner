@@ -23,10 +23,10 @@ export const usePlanning = () => {
       isError = true;
     }
 
-    // 出発時間と目的地の時間が両方とも入力されていない場合はエラー
-    if ((!departureData.time && !destinationData.time) || (departureData.time === '' && destinationData.time === '')) {
+    // 出発時間と目的地の時間が片方でも入力されていない場合はエラー
+    if (departureData.time === '' || destinationData.time === '') {
       fields.setPlanErrors(date, {
-        departure: '出発時間または到着時間のどちらかを入力してください',
+        departure: '出発時間と到着時間を入力してください',
       });
       isError = true;
     }

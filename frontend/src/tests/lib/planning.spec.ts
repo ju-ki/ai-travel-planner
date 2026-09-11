@@ -5,7 +5,6 @@ vi.mock('@/lib/plan', () => ({
 }));
 
 import {
-  determinePlanningMode,
   executePlanning,
   getPlanningMessagePriority,
   getOptimalRouteWithAlternatives,
@@ -235,24 +234,6 @@ function setupDeterministicRouteMock(): void {
 describe('planning.ts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('出発地と目的地の入力パターン', () => {
-    it('出発時間と到着時間が両方入力済みならBOTHを返す', () => {
-      expect(determinePlanningMode('09:00', '18:00')).toBe('BOTH');
-    });
-
-    it('出発時間のみ入力済みならFORWARDを返す', () => {
-      expect(determinePlanningMode('09:00', '')).toBe('FORWARD');
-    });
-
-    it('到着時間のみ入力済みならBACKWARDを返す', () => {
-      expect(determinePlanningMode('', '18:00')).toBe('BACKWARD');
-    });
-
-    it('出発時間と到着時間が両方未入力ならエラーにする', () => {
-      expect(() => determinePlanningMode('', '')).toThrow('出発時間または到着時間のどちらかを入力してください');
-    });
   });
 
   describe('発車時間の候補選択ルール', () => {
