@@ -1,15 +1,12 @@
-import { AlertTriangle, Bus, Calendar, ChevronDown, ChevronUp, Loader2, Train } from 'lucide-react';
+import { Bus, ChevronDown, ChevronUp, Loader2, Train } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { calculateDistance, estimateTransitTime } from '@/data/mockNearestStation';
 import { searchNearestStation } from '@/lib/google-maps';
 import { useStoreForPlanning } from '@/lib/plan';
@@ -40,9 +37,6 @@ const NearestStationDestination = ({ date }: { date: string }) => {
   );
   const [destinationTransitTime, setDestinationTransitTime] = useState<number>(
     destinationData?.nearestStation?.transitTime || 0,
-  );
-  const [isDestinationManualTransitTime, setIsDestinationManualTransitTime] = useState<boolean>(
-    destinationData?.nearestStation?.isManualTransitTime || false,
   );
   // 発着時間メモ
   const [scheduledDepartureTime, setScheduledDepartureTime] = useState<string>(
@@ -121,7 +115,6 @@ const NearestStationDestination = ({ date }: { date: string }) => {
       handleDestinationChange({ ...destinationData, nearestStation: undefined });
       setSelectedDestinationStationId(null);
       setDestinationTransitTime(0);
-      setIsDestinationManualTransitTime(false);
       setScheduledDepartureTime('');
       setScheduledDepartureTimes(['', '', '']);
     }
@@ -135,7 +128,6 @@ const NearestStationDestination = ({ date }: { date: string }) => {
       const distanceFromPrevious = getDistanceFromPrevious();
       const estimatedTime = distanceFromPrevious ? estimateTransitTime(distanceFromPrevious) : 0;
       setDestinationTransitTime(estimatedTime);
-      setIsDestinationManualTransitTime(false);
       handleDestinationChange({
         ...destinationData,
         nearestStation: {
@@ -147,7 +139,6 @@ const NearestStationDestination = ({ date }: { date: string }) => {
           latitude: station.latitude || 0,
           longitude: station.longitude || 0,
           transitTime: estimatedTime,
-          isManualTransitTime: false,
           scheduledDepartureTime,
           scheduledDepartureTimes: scheduledDepartureTimes.filter((candidate) => candidate !== ''),
         },
@@ -211,7 +202,6 @@ const NearestStationDestination = ({ date }: { date: string }) => {
   const handleDestinationTransitTimeChange = (newTime: number) => {
     const validTime = Math.min(540, Math.max(1, newTime || 1));
     setDestinationTransitTime(validTime);
-    setIsDestinationManualTransitTime(true);
 
     if (destinationData?.nearestStation) {
       handleDestinationChange({
@@ -219,7 +209,6 @@ const NearestStationDestination = ({ date }: { date: string }) => {
         nearestStation: {
           ...destinationData.nearestStation,
           transitTime: validTime,
-          isManualTransitTime: true,
         },
       });
     }
