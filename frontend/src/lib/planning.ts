@@ -1358,67 +1358,6 @@ async function runForwardPlanning(params: PlanningParams): Promise<{
   };
 }
 
-async function runBackwardPlanning(params: PlanningParams): Promise<{
-  routes: RouteInfo[];
-  arrivalTime: string;
-  departureTime: string;
-  messages: PlanningMessage[];
-  totalDuration: number;
-  totalDistance: number;
-  updatedSpots: ExtendSpotType[];
-  updatedDeparture: ExtendPlanLocationType;
-  updatedDestination: ExtendPlanLocationType;
-}> {
-  /**
-   * 到着時刻から逆算する際も、前進プランニングを反復実行して候補時刻を収束させる。
-   * 発車候補や待機時間の影響を forward 側の計算に寄せるための実装。
-   */
-  const targetArrivalTime = resolveLocationTime(params.destination.time, DEFAULT_ARRIVAL_TIME);
-  const targetArrivalMinutes = timeToMinutes(targetArrivalTime);
-
-  let estimatedDepartureTime = resolveLocationTime(params.departure.time, DEFAULT_DEPARTURE_TIME);
-  let latestForwardResult: Awaited<ReturnType<typeof runForwardPlanning>> | null = null;
-
-  // 候補時刻による待機時間があるため、数回の反復で逆算時刻を安定させる
-  for (let index = 0; index < 3; index += 1) {
-    latestForwardResult = await runForwardPlanning({
-      ...params,
-      departure: {
-        ...params.departure,
-        time: estimatedDepartureTime,
-      },
-    });
-
-    const consumedMinutes = Math.round(latestForwardResult.totalDuration / 60);
-    const nextDepartureTime = minutesToTime(targetArrivalMinutes - consumedMinutes);
-
-    if (nextDepartureTime === estimatedDepartureTime) break;
-    estimatedDepartureTime = nextDepartureTime;
-  }
-
-  if (!latestForwardResult) {
-    latestForwardResult = await runForwardPlanning({
-      ...params,
-      departure: {
-        ...params.departure,
-        time: estimatedDepartureTime,
-      },
-    });
-  }
-
-  return {
-    routes: latestForwardResult.routes,
-    arrivalTime: latestForwardResult.arrivalTime,
-    departureTime: estimatedDepartureTime,
-    messages: latestForwardResult.messages,
-    totalDuration: latestForwardResult.totalDuration,
-    totalDistance: latestForwardResult.totalDistance,
-    updatedSpots: latestForwardResult.updatedSpots,
-    updatedDeparture: latestForwardResult.updatedDeparture,
-    updatedDestination: latestForwardResult.updatedDestination,
-  };
-}
-
 /**
  * 算出された到着時間が目標到着時間を超過しているかを判定
  * @param calculatedArrivalTime
@@ -1445,25 +1384,6 @@ export function sortPlanningMessages(messages: PlanningMessage[]): PlanningMessa
 }
 
 /**
- * プランニングの時間計算モード
- */
-type PlanningMode = 'FORWARD' | 'BACKWARD' | 'BOTH';
-
-/**
- * プランニングモードを判定
- */
-export function determinePlanningMode(departureTime: string, arrivalTime: string): PlanningMode {
-  const hasDeparture = departureTime && /^\d{2}:\d{2}$/.test(departureTime);
-  const hasArrival = arrivalTime && /^\d{2}:\d{2}$/.test(arrivalTime);
-
-  if (hasDeparture && hasArrival) return 'BOTH';
-  if (hasDeparture) return 'FORWARD';
-  if (hasArrival) return 'BACKWARD';
-
-  throw new Error('出発時間または到着時間のどちらかを入力してください');
-}
-
-/**
  * メインプランニング関数
  */
 export async function executePlanning(params: PlanningParams): Promise<PlanningResult> {
@@ -1471,133 +1391,72 @@ export async function executePlanning(params: PlanningParams): Promise<PlanningR
   const departureTime = departure.time || '';
   const arrivalTime = destination.time || '';
 
-  const mode = determinePlanningMode(departureTime, arrivalTime);
+  // 出発時間から順方向に計算
+  const forwardResult = await runForwardPlanning(params);
+  let extraTimeMessage: string | undefined;
 
-  let result: PlanningResult;
-
-  switch (mode) {
-    case 'FORWARD': {
-      const forwardResult = await runForwardPlanning(params);
-      const isOverTime = calculateIsOverTime(forwardResult.arrivalTime, arrivalTime);
-      result = {
-        routes: forwardResult.routes,
-        totalDistance: forwardResult.totalDistance,
-        totalDuration: forwardResult.totalDuration,
-        departureTime,
-        arrivalTime: forwardResult.arrivalTime,
-        isOverTime,
-        messages: forwardResult.messages,
-        updatedSpots: forwardResult.updatedSpots,
-        updatedDeparture: forwardResult.updatedDeparture,
-        updatedDestination: forwardResult.updatedDestination,
-      };
-      break;
-    }
-
-    case 'BACKWARD': {
-      const backwardResult = await runBackwardPlanning(params);
-      const isOverTime = calculateIsOverTime(backwardResult.arrivalTime, arrivalTime);
-      const overTimeMinutes =
-        isOverTime && arrivalTime ? timeToMinutes(backwardResult.arrivalTime) - timeToMinutes(arrivalTime) : 0;
-      const arrivalWarning =
-        isOverTime && arrivalTime
-          ? createArrivalWarning(backwardResult.departureTime, arrivalTime, backwardResult.arrivalTime)
-          : null;
-      if (isOverTime && arrivalTime) {
-        backwardResult.messages.push({
-          level: 'WARNING',
-          message: buildOverTimeSuggestionMessage(overTimeMinutes),
-          segmentKey: PLANNING_MESSAGE_SEGMENT.OVER_TIME,
-        });
-      }
-
-      result = {
-        routes: backwardResult.routes,
-        totalDistance: backwardResult.totalDistance,
-        totalDuration: backwardResult.totalDuration,
-        departureTime: backwardResult.departureTime,
-        arrivalTime: backwardResult.arrivalTime,
-        isOverTime,
-        overTimeMinutes,
-        arrivalWarning,
-        messages: backwardResult.messages,
-        updatedSpots: backwardResult.updatedSpots,
-        updatedDeparture: backwardResult.updatedDeparture,
-        updatedDestination: backwardResult.updatedDestination,
-      };
-      break;
-    }
-
-    case 'BOTH': {
-      // 出発時間から順方向に計算
-      const forwardResult = await runForwardPlanning(params);
-      let extraTimeMessage: string | undefined;
-
-      // 到着時間を超過しているか確認
-      const isOverTime = calculateIsOverTime(forwardResult.arrivalTime, arrivalTime);
-      const arrivalWarning =
-        isOverTime && arrivalTime ? createArrivalWarning(departureTime, arrivalTime, forwardResult.arrivalTime) : null;
-      if (isOverTime && arrivalTime) {
-        // OVER_TIME は1件のみ表示する
-      }
-      const overTimeMinutes = isOverTime ? timeToMinutes(forwardResult.arrivalTime) - timeToMinutes(arrivalTime) : 0;
-
-      // 余裕時間を計算（到着時間より早く着く場合）
-      const extraTimeMinutes = !isOverTime ? timeToMinutes(arrivalTime) - timeToMinutes(forwardResult.arrivalTime) : 0;
-
-      // 到着時間超過の警告を追加
-      if (isOverTime) {
-        forwardResult.messages.push({
-          level: 'WARNING',
-          message: buildOverTimeSuggestionMessage(overTimeMinutes),
-          segmentKey: PLANNING_MESSAGE_SEGMENT.OVER_TIME,
-        });
-      }
-
-      // 余裕時間がある場合の提案を生成
-      if (extraTimeMinutes >= 90) {
-        extraTimeMessage = '新しいスポットを追加して、より充実した旅程にしませんか';
-        forwardResult.messages.push({
-          level: 'INFO',
-          message: extraTimeMessage,
-          segmentKey: PLANNING_MESSAGE_SEGMENT.EXTRA_TIME,
-        });
-      } else if (extraTimeMinutes >= 60) {
-        const perSpotExtraMinutes = Math.floor(extraTimeMinutes / Math.max(params.spots.length, 1));
-        extraTimeMessage = `各スポットで約${perSpotExtraMinutes}分ずつ長く滞在できます`;
-        forwardResult.messages.push({
-          level: 'INFO',
-          message: extraTimeMessage,
-          segmentKey: PLANNING_MESSAGE_SEGMENT.EXTRA_TIME,
-        });
-      } else if (extraTimeMinutes >= 30) {
-        extraTimeMessage = 'お気に入りのスポットでもう少しゆっくり過ごしてみては？';
-        forwardResult.messages.push({
-          level: 'INFO',
-          message: extraTimeMessage,
-          segmentKey: PLANNING_MESSAGE_SEGMENT.EXTRA_TIME,
-        });
-      }
-
-      result = {
-        routes: forwardResult.routes,
-        totalDistance: forwardResult.totalDistance,
-        totalDuration: forwardResult.totalDuration,
-        departureTime,
-        arrivalTime: forwardResult.arrivalTime,
-        isOverTime,
-        overTimeMinutes: overTimeMinutes,
-        arrivalWarning,
-        extraTimeMinutes: extraTimeMinutes,
-        extraTimeMessage,
-        messages: forwardResult.messages,
-        updatedSpots: forwardResult.updatedSpots,
-        updatedDeparture: forwardResult.updatedDeparture,
-        updatedDestination: forwardResult.updatedDestination,
-      };
-      break;
-    }
+  // 到着時間を超過しているか確認
+  const isOverTime = calculateIsOverTime(forwardResult.arrivalTime, arrivalTime);
+  const arrivalWarning =
+    isOverTime && arrivalTime ? createArrivalWarning(departureTime, arrivalTime, forwardResult.arrivalTime) : null;
+  if (isOverTime && arrivalTime) {
+    // OVER_TIME は1件のみ表示する
   }
+  const overTimeMinutes = isOverTime ? timeToMinutes(forwardResult.arrivalTime) - timeToMinutes(arrivalTime) : 0;
+
+  // 余裕時間を計算（到着時間より早く着く場合）
+  const extraTimeMinutes = !isOverTime ? timeToMinutes(arrivalTime) - timeToMinutes(forwardResult.arrivalTime) : 0;
+
+  // 到着時間超過の警告を追加
+  if (isOverTime) {
+    forwardResult.messages.push({
+      level: 'WARNING',
+      message: buildOverTimeSuggestionMessage(overTimeMinutes),
+      segmentKey: PLANNING_MESSAGE_SEGMENT.OVER_TIME,
+    });
+  }
+
+  // 余裕時間がある場合の提案を生成
+  if (extraTimeMinutes >= 90) {
+    extraTimeMessage = '新しいスポットを追加して、より充実した旅程にしませんか';
+    forwardResult.messages.push({
+      level: 'INFO',
+      message: extraTimeMessage,
+      segmentKey: PLANNING_MESSAGE_SEGMENT.EXTRA_TIME,
+    });
+  } else if (extraTimeMinutes >= 60) {
+    const perSpotExtraMinutes = Math.floor(extraTimeMinutes / Math.max(params.spots.length, 1));
+    extraTimeMessage = `各スポットで約${perSpotExtraMinutes}分ずつ長く滞在できます`;
+    forwardResult.messages.push({
+      level: 'INFO',
+      message: extraTimeMessage,
+      segmentKey: PLANNING_MESSAGE_SEGMENT.EXTRA_TIME,
+    });
+  } else if (extraTimeMinutes >= 30) {
+    extraTimeMessage = 'お気に入りのスポットでもう少しゆっくり過ごしてみては？';
+    forwardResult.messages.push({
+      level: 'INFO',
+      message: extraTimeMessage,
+      segmentKey: PLANNING_MESSAGE_SEGMENT.EXTRA_TIME,
+    });
+  }
+
+  const result = {
+    routes: forwardResult.routes,
+    totalDistance: forwardResult.totalDistance,
+    totalDuration: forwardResult.totalDuration,
+    departureTime,
+    arrivalTime: forwardResult.arrivalTime,
+    isOverTime,
+    overTimeMinutes: overTimeMinutes,
+    arrivalWarning,
+    extraTimeMinutes: extraTimeMinutes,
+    extraTimeMessage,
+    messages: forwardResult.messages,
+    updatedSpots: forwardResult.updatedSpots,
+    updatedDeparture: forwardResult.updatedDeparture,
+    updatedDestination: forwardResult.updatedDestination,
+  };
 
   result.messages = sortPlanningMessages(result.messages);
 
