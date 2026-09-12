@@ -3,8 +3,6 @@
  */
 import { PlanLocationCandidateItemSchema, PlanLocationCandidateResponseSchema } from '@shared/user/schema';
 
-import type { StationType } from '@/types/nearestStation';
-
 import type { PlanLocationCandidateResponseType } from '@shared/user/types';
 
 // 地点タイプ
@@ -15,23 +13,6 @@ export const LOCATION_TYPE = {
 
 export { PlanLocationCandidateItemSchema as DepartureAndDestinationSchema };
 export { PlanLocationCandidateResponseSchema };
-
-/** 出発地・目的地に紐づく最寄駅情報 */
-export type DepartureDestinationNearestStation = {
-  spotId?: string;
-  placeId: string;
-  stationType: StationType;
-  name?: string;
-  walkingTime?: number;
-  latitude: number;
-  longitude: number;
-  transitTime?: number;
-  isManualTransitTime?: boolean;
-  scheduledDepartureTime?: string;
-  scheduledDepartureTimes?: string[];
-  waitingTime?: number;
-  memo?: string;
-};
 
 export type { PlanLocationCandidateResponseType as PlanLocationCandidatesResponse };
 

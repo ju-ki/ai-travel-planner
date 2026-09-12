@@ -41,9 +41,7 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
   const [departureTransitTime, setDepartureTransitTime] = useState<number>(
     departureData?.nearestStation?.transitTime || 0,
   );
-  const [isDepartureManualTransitTime, setIsDepartureManualTransitTime] = useState<boolean>(
-    departureData?.nearestStation?.isManualTransitTime || false,
-  );
+
   // 発着時間メモ
   const [scheduledDepartureTime, setScheduledDepartureTime] = useState<string>(
     departureData?.nearestStation?.scheduledDepartureTime || '',
@@ -115,7 +113,6 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
       handleDepartureChange({ ...departureData, nearestStation: undefined });
       setSelectedDepartureStationId(null);
       setDepartureTransitTime(0);
-      setIsDepartureManualTransitTime(false);
       setScheduledDepartureTime('');
       setScheduledDepartureTimes(['', '', '']);
     }
@@ -129,7 +126,6 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
       const distanceFromPrevious = getDistanceFromPrevious();
       const estimatedTime = distanceFromPrevious ? estimateTransitTime(distanceFromPrevious) : 0;
       setDepartureTransitTime(estimatedTime);
-      setIsDepartureManualTransitTime(false);
       handleDepartureChange({
         ...departureData,
         transportMethodId: 4,
@@ -143,7 +139,6 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
           latitude: station.latitude || 0,
           longitude: station.longitude || 0,
           transitTime: estimatedTime,
-          isManualTransitTime: false,
           scheduledDepartureTime,
           scheduledDepartureTimes: scheduledDepartureTimes.filter((candidate) => candidate !== ''),
         },
@@ -207,7 +202,6 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
   const handleDepartureTransitTimeChange = (newTime: number) => {
     const validTime = Math.min(540, Math.max(1, newTime || 1));
     setDepartureTransitTime(validTime);
-    setIsDepartureManualTransitTime(true);
 
     if (departureData?.nearestStation) {
       handleDepartureChange({
@@ -215,7 +209,6 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
         nearestStation: {
           ...departureData.nearestStation,
           transitTime: validTime,
-          isManualTransitTime: true,
         },
       });
     }
@@ -337,11 +330,7 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
                             />
                             <span className="text-sm text-muted-foreground">分</span>
                           </div>
-                          {isDepartureManualTransitTime ? (
-                            <Badge variant="outline" className="text-xs">
-                              手入力
-                            </Badge>
-                          ) : (
+                          {
                             <Tooltip>
                               <TooltipTrigger>
                                 <Badge variant="secondary" className="text-xs gap-1">
@@ -357,7 +346,7 @@ const NearestStationDeparture = ({ date }: { date: string }) => {
                                 </p>
                               </TooltipContent>
                             </Tooltip>
-                          )}
+                          }
                         </div>
 
                         {/* 発車時間入力 */}

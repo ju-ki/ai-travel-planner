@@ -35,8 +35,6 @@ export type ExtendNearestStationType = NearestStationType & {
   walkingTime?: number; // 徒歩時間（分）
   latitude: number;
   longitude: number;
-  /** 手入力フラグ - trueの場合はユーザーが入力した値 */
-  isManualTransitTime?: boolean;
   /** 電車/バスの発車時間候補（最大3件） */
   scheduledDepartureTimes?: string[];
   /** 駅での待機時間（分）- 自動計算または手入力 */

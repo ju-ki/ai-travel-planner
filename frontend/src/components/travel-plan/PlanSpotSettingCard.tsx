@@ -101,9 +101,7 @@ export default function PlanSpotSettingCard({
   const [isLoadingStations, setIsLoadingStations] = useState(false);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(spot.nearestStation?.placeId || null);
   const [transitTime, setTransitTime] = useState<number>(spot.nearestStation?.transitTime || 0);
-  const [isManualTransitTime, setIsManualTransitTime] = useState<boolean>(
-    spot.nearestStation?.isManualTransitTime || false,
-  );
+
   const [scheduledDepartureTime, setScheduledDepartureTime] = useState<string>(
     spot.nearestStation?.scheduledDepartureTime || '',
   );
@@ -166,7 +164,6 @@ export default function PlanSpotSettingCard({
       onSettingChange({ ...spot, nearestStation: undefined });
       setSelectedStationId(null);
       setTransitTime(0);
-      setIsManualTransitTime(false);
       setScheduledDepartureTime('');
       setScheduledDepartureTimes(['', '', '']);
       setTransitMemo('');
@@ -179,7 +176,6 @@ export default function PlanSpotSettingCard({
     if (station) {
       const estimatedTime = distanceFromPrevious ? estimateTransitTime(distanceFromPrevious) : 0;
       setTransitTime(estimatedTime);
-      setIsManualTransitTime(false);
 
       onSettingChange({
         ...spot,
@@ -194,7 +190,6 @@ export default function PlanSpotSettingCard({
           latitude: station.latitude || 0,
           longitude: station.longitude || 0,
           transitTime: estimatedTime,
-          isManualTransitTime: false,
           scheduledDepartureTime,
           scheduledDepartureTimes: scheduledDepartureTimes.filter((candidate) => candidate !== ''),
         },
@@ -255,7 +250,6 @@ export default function PlanSpotSettingCard({
   const handleTransitTimeChange = (newTime: number) => {
     const validTime = Math.min(540, Math.max(1, newTime || 1));
     setTransitTime(validTime);
-    setIsManualTransitTime(true);
 
     if (spot.nearestStation) {
       onSettingChange({
@@ -263,7 +257,6 @@ export default function PlanSpotSettingCard({
         nearestStation: {
           ...spot.nearestStation,
           transitTime: validTime,
-          isManualTransitTime: true,
         },
       });
     }
@@ -506,11 +499,7 @@ export default function PlanSpotSettingCard({
                               />
                               <span className="text-sm text-muted-foreground">分</span>
                             </div>
-                            {isManualTransitTime ? (
-                              <Badge variant="outline" className="text-xs">
-                                手入力
-                              </Badge>
-                            ) : (
+                            {
                               <Tooltip>
                                 <TooltipTrigger>
                                   <Badge variant="secondary" className="text-xs gap-1">
@@ -526,7 +515,7 @@ export default function PlanSpotSettingCard({
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
-                            )}
+                            }
                           </div>
 
                           <div className="flex flex-col items-start gap-2 sm:flex-row sm:gap-4">
