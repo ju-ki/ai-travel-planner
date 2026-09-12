@@ -108,6 +108,8 @@ export const usePlanning = () => {
 
       const result = await executePlanning(params);
 
+      console.log('プランニング結果:', result);
+
       fields.setPlanningResult(date, result);
       fields.setDepartureAndDestination(date, TransportNodeType.DEPARTURE, {
         ...result.updatedDeparture,
